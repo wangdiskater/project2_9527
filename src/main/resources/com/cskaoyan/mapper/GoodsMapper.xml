@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cskaoyan.mapper.GoodsMapper">
+
+    <resultMap id="goodsVo" type="com.cskaoyan.vo.goods.GoodsVo">
+        <result column="id" property="id"/>
+        <result column="goods_sn" property="goodsSn"/>
+        <result column="name" property="name"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="brand_id" property="brandId"/>
+        <result column="gallery" property="gallery"/>
+        <result column="keywords" property="keywords"/>
+        <result column="brief" property="brief"/>
+        <result column="is_on_sale" property="isOnSale"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="share_url" property="shareUrl"/>
+        <result column="is_new" property="isNew"/>
+        <result column="is_hot" property="isHot"/>
+        <result column="unit" property="unit"/>
+        <result column="counter_price" property="counterPrice"/>
+        <result column="retail_price" property="retailPrice"/>
+        <result column="detail" property="detail"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+
+    </resultMap>
+
+    <sql id="base_column_list">
+      id,goods_sn,`name`,category_id,brand_id,gallery,keywords,brief,is_on_sale,
+      sort_order,pic_url,share_url,is_new,is_hot,unit,counter_price,retail_price,
+      detail, add_time,update_time,deleted
+   </sql>
+
+    <select id="queryAllGoodsList" resultMap="goodsVo">
+        select
+        <include refid="base_column_list"/>
+        from cskaoyan_mall_goods
+        <where>
+            <if test="goodsSn!=null and goodsSn!=''">
+                and goods_sn=#{goodsSn}
+            </if>
+            <if test="name!=null and name!=''">
+                and `name` like "%" #{name} "%"
+            </if>
+        </where>
+        ORDER BY #{sort} #{order}
+    </select>
+
+    <!--查询评论-->
+    <resultMap id="commentMap" type="com.cskaoyan.vo.comment.CommentVo">
+        <result column="id" property="id"/>
+        <result column="value_id" property="valueId"/>
+        <result column="type" property="type"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="has_picture" property="hasPicture"/>
+        <result column="pic_urls" property="picUrls"/>
+        <result column="star" property="star"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="queryComment" resultMap="commentMap">
+        select
+        id,value_id,type,content,user_id,has_picture,pic_urls,star,add_time,
+        update_time,deleted
+        from cskaoyan_mall_comment
+        where 1 = 1
+        <if test="commentSearch.userId != null and commentSearch.userId != ''">
+            AND user_id = #{commentSearch.userId}
+        </if>
+        <if test="commentSearch.valueId != null and commentSearch.valueId != ''">
+            AND value_id = #{commentSearch.valueId}
+        </if>
+        ORDER BY #{commentSearch.sort} #{commentSearch.order}
+    </select>
+    <!--删除评论-->
+    <delete id="deleteCommentById">
+        delete from cskaoyan_mall_comment where id = #{id}
+    </delete>
+
+
+    <!--查询商品类目的父类-->
+    <resultMap id="categoryMap" type="com.cskaoyan.vo.goods.CategoryListVo">
+        <result property="label" column="name"/>
+        <result property="value" column="id"/>
+        <collection property="children" column="id" select="com.cskaoyan.mapper.GoodsMapper.queryCategoryChildrenById"/>
+    </resultMap>
+    <select id="queryCategoryList" resultMap="categoryMap">
+    select id,`name` from cskaoyan_mall_category
+    </select>
+    <!--查询商品类目的子类-->
+    <resultMap id="categoryChildrenMap" type="com.cskaoyan.vo.goods.ChildrenVo">
+        <result property="value" column="id"/>
+        <result property="label" column="name"/>
+    </resultMap>
+    <select id="queryCategoryChildrenById" resultMap="categoryChildrenMap">
+      select id,name from cskaoyan_mall_category where pid=#{id}
+    </select>
+
+
+    <!--查询商品品牌-->
+    <resultMap id="brandMap" type="com.cskaoyan.vo.goods.BrandListVo">
+        <result property="value" column="id"/>
+        <result property="label" column="name"/>
+    </resultMap>
+    <select id="queryGoodsBrandList" resultMap="brandMap">
+        select id,`name` from cskaoyan_mall_brand
+    </select>
+
+
+    <!--商品添加-->
+
+    <sql id="base_column_list2">
+     goods_sn,`name`,category_id,brand_id,gallery,keywords,brief,is_on_sale,
+      sort_order,pic_url,share_url,is_new,is_hot,unit,counter_price,retail_price,
+     add_time,update_time,deleted,detail
+   </sql>
+
+    <!--添加商品-->
+    <insert id="insertGoods">
+        <selectKey resultType="int" keyColumn="id" keyProperty="goodsVoList.goods.id" order="AFTER">
+            SELECT last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_goods (id,pic_url,gallery,goods_sn,`name`,counter_price,retail_price,
+        is_hot,is_on_sale,unit,category_id,brand_id,brief,detail,add_time,keywords) value(
+        null,
+        #{goodsVoList.goods.picUrl},#{goodsVoList.goods.gallery},#{goodsVoList.goods.goodsSn},#{goodsVoList.goods.name},#{goodsVoList.goods.counterPrice},
+        #{goodsVoList.goods.retailPrice},#{goodsVoList.goods.isHot},#{goodsVoList.goods.isOnSale},#{goodsVoList.goods.unit},
+        #{goodsVoList.goods.categoryId},#{goodsVoList.goods.brandId},#{goodsVoList.goods.brief},#{goodsVoList.goods.detail},now(),#{goodsVoList.goods.keywords}
+        )
+    </insert>
+
+    <!--添加商品参数-->
+    <insert id="insertGoodsAttribute">
+        insert into cskaoyan_mall_goods_attribute (goods_id,attribute,`value`,add_time,update_time) value
+        <foreach collection="goodsVoList.attributes" item="goodsvo" separator=",">
+            (
+            #{goodsVoList.goods.id},#{goodsvo.attribute},#{goodsvo.value},now(),null
+            )
+        </foreach>
+    </insert>
+
+    <!--添加商品规格-->
+    <insert id="insertGoodsSpecification">
+        insert into cskaoyan_mall_goods_specification (goods_id,specification,`value`,pic_url,add_time,update_time)
+        value
+        <foreach collection="goodsVoList.specifications" item="goodsvo" separator=",">
+            (
+            #{goodsVoList.goods.id},#{goodsvo.specification},#{goodsvo.value},
+            #{goodsvo.picUrl},now(),null
+            )
+        </foreach>
+    </insert>
+
+
+    <!--添加商品货品-->
+    <insert id="insertGoodsProduct">
+        insert into cskaoyan_mall_goods_product (goods_id,specifications,price,`number`,url,add_time) value
+        <foreach collection="goodsVoList.products" item="goodsvo" separator=",">
+            (#{goodsVoList.goods.id},#{goodsvo.specifications},
+            #{goodsvo.price},#{goodsvo.number},#{goodsvo.url},now()
+            )
+        </foreach>
+    </insert>
+
+    <!--删除商品-->
+    <delete id="deleteGoodsById">
+        delete from cskaoyan_mall_goods where id=#{goods.id}
+    </delete>
+
+    <!--根据id查询商品的相关信息-->
+    <select id="queryGoodsById" resultMap="goodsVo">
+        select
+        <include refid="base_column_list"/>
+        from cskaoyan_mall_goods where id=#{id}
+    </select>
+
+
+    <!--根据商品id查询商品参数信息-->
+    <resultMap id="goodsAttributesMap" type="com.cskaoyan.vo.goods.GoodsAttributeVo">
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="attribute" column="attribute"/>
+        <result property="value" column="value"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryGoodsGoodsAttributesById" resultMap="goodsAttributesMap">
+        select id ,goods_id,attribute,`value`,add_time,update_time,deleted from cskaoyan_mall_goods_attribute
+        where goods_id=#{id}
+    </select>
+
+    <!--根据商品id查询商品规格信息-->
+    <resultMap id="specificationMap" type="com.cskaoyan.vo.goods.GoodsSpecificationVo">
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="specification" column="specification"/>
+        <result property="value" column="value"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryGoodsSpecifications" resultMap="specificationMap">
+        select id,goods_id,specification,`value`,pic_url,add_time,update_time,deleted
+        from cskaoyan_mall_goods_specification where goods_id=#{id}
+    </select>
+
+    <!-- 根据商品id查询商品货品信息-->
+    <resultMap id="productMap" type="com.cskaoyan.vo.goods.ProductSVo">
+        <result column="id" property="id"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="specifications" property="specifications"/>
+        <result column="price" property="price"/>
+        <result column="number" property="number"/>
+        <result column="url" property="url"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="queryProductsById" resultMap="productMap">
+     select id,goods_id,specifications,price,`number`,url,add_time,update_time,deleted
+     from cskaoyan_mall_goods_product where goods_id=#{id}
+    </select>
+
+    <!-- 根据商品中类目子id查询父类商品类目pid -->
+    <select id="queryCategoryId" resultType="com.cskaoyan.vo.goods.CategoryVo">
+        select id,pid from cskaoyan_mall_category where id=#{categoryId}
+    </select>
+
+
+    <!--商品信息的修改-->
+    <update id="updateGoods">
+  update cskaoyan_mall_goods set
+goods_sn=#{goodsVoList.goods.goodsSn},`name`=#{goodsVoList.goods.name},
+category_id= #{goodsVoList.goods.categoryId},brand_id=#{goodsVoList.goods.brandId},
+gallery=#{goodsVoList.goods.gallery},keywords=#{goodsVoList.goods.keywords},
+brief=#{goodsVoList.goods.brief},is_on_sale=#{goodsVoList.goods.isOnSale},sort_order=#{goodsVoList.goods.sortOrder},
+pic_url=#{goodsVoList.goods.picUrl},share_url=#{goodsVoList.goods.shareUrl},is_new=#{goodsVoList.goods.isNew},
+is_hot=#{goodsVoList.goods.isHot},unit=#{goodsVoList.goods.unit},counter_price=#{goodsVoList.goods.counterPrice},
+retail_price= #{goodsVoList.goods.retailPrice},detail=#{goodsVoList.goods.detail}
+,update_time=now(),deleted=#{goodsVoList.goods.deleted}
+where id=#{goodsVoList.goods.id}
+</update>
+
+    <!--根据商品id把规格表进行删除-->
+    <delete id="deleteSpecificationsById">
+        delete from cskaoyan_mall_goods_specification where goods_id=#{id}
+    </delete>
+
+    <!--根据商品id把商品货品删除-->
+    <delete id="deleteProducts">
+        delete from cskaoyan_mall_goods_product where goods_id=#{id}
+    </delete>
+
+    <!--根据商品id把商品参数删除-->
+    <delete id="deleteAttribute">
+        delete from cskaoyan_mall_goods_attribute where goods_id=#{id}
+    </delete>
+
+    <!--使用之前的方法-->
+    <!--添加商品规格-->
+    <!--添加商品参数-->
+    <!--添加商品货品-->
+
+    <!-- 商品数量 -->
+    <select id="queryGoodsCount" resultType="int">
+        select count(id) from cskaoyan_mall_goods
+    </select>
+
+
+    <!--货物数量-->
+    <select id="queryProductsCount" resultType="int">
+        select count(id) from cskaoyan_mall_goods_product
+    </select>
+
+    <!--查询所有新品-->
+    <resultMap id="newGoodsMap" type="com.cskaoyan.vo.goods.GoodsVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="brief" property="brief"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="is_new" property="isNew"/>
+        <result column="is_hot" property="isHot"/>
+        <result column="counter_price" property="counterPrice"/>
+        <result column="retail_price" property="retailPrice"/>
+    </resultMap>
+    <!--查询所有新品-->
+    <select id="queryAllNewGoods" resultMap="newGoodsMap">
+        select id,name,brief,pic_url,is_new,is_hot,counter_price,retail_price
+        from cskaoyan_mall_goods where is_new = 1
+    </select>
+    <!--查询所有热卖-->
+    <select id="queryAllHotGoods" resultMap="newGoodsMap">
+        select id,name,brief,pic_url,is_new,is_hot,counter_price,retail_price
+        from cskaoyan_mall_goods where is_hot = 1
+    </select>
+
+    <!--查询所有商品-->
+    <select id="queryAllGoodsToHome" resultMap="newGoodsMap">
+                select id,name,brief,pic_url,is_new,is_hot,counter_price,retail_price
+        from cskaoyan_mall_goods
+    </select>
+
+    <!--查询是否已经收藏指定商品-->
+    <select id="queryCollectOrNot" resultType="int">
+        select value_id
+        from cskaoyan_mall_collect
+    </select>
+
+    <!--前台收藏商品-->
+    <insert id="add">
+        insert into cskaoyan_mall_collect values
+        (null, 1, #{valueId}, #{type}, now(), now(), 0)
+    </insert>
+
+    <!--前台取消收藏商品-->
+    <delete id="delete">
+        delete
+        from cskaoyan_mall_collect
+        where value_id = #{valueId}
+    </delete>
+
+    <!--前台显示收藏列表-->
+    <resultMap id="collectList" type="com.cskaoyan.bean.CollectList">
+        <result column="brief" property="brief"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="goods_sn" property="valueId"/>
+        <result column="name" property="name"/>
+        <result column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="retail_price" property="retailPrice"/>
+    </resultMap>
+    <select id="queryCollectList" resultMap="collectList">
+        select g.brief, g.pic_url, g.goods_sn, g.name, c.id, c.type, g.retail_price from cskaoyan_mall_collect c
+        left join cskaoyan_mall_goods g on c.value_id = g.goods_sn
+    </select>
+
+
+    <!--前台商品的处理-->
+    <resultMap id="wxcategoryMap" type="com.cskaoyan.vo.wx.wxgoods.WxCategoryVo">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="keywords" column="keywords"/>
+        <result property="desc" column="desc"/>
+        <result property="pid" column="pid"/>
+        <result property="iconUrl" column="icon_url"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="level" column="level"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="queryCurrentCategory" resultMap="wxcategoryMap">
+        select id,`name`,keywords,`desc`,pid,icon_url,pic_url,`level`,
+        sort_order,add_time,update_time,deleted from cskaoyan_mall_category
+        where id=#{id}
+    </select>
+
+    <select id="queryBrotherCategory" resultMap="wxcategoryMap">
+       select id,`name`,keywords,`desc`,pid,icon_url,pic_url,`level`,
+        sort_order,add_time,update_time,deleted from cskaoyan_mall_category
+        where pid=#{id}
+    </select>
+
+    <select id="queryParentCategory" resultMap="wxcategoryMap">
+        select id,`name`,keywords,`desc`,pid,icon_url,pic_url,`level`,
+        sort_order,add_time,update_time,deleted from cskaoyan_mall_category
+        where id=#{id}
+    </select>
+
+
+    <!--查询所有一级类目下的商品-->
+
+
+    <select id="selectGoodsByChannel" resultMap="newGoodsMap">
+        select mg.id,mg.name,mg.brief,mg.pic_url,mg.is_new,mg.is_hot,mg.counter_price,mg.retail_price
+        from cskaoyan_mall_category mc
+        RIGHT JOIN
+        cskaoyan_mall_goods mg on
+        mc.id = mg.category_id
+        where pid = #{pid}
+    </select>
+
+    <!--显示商品个数-->
+    <select id="queryAllGoodsNum" resultType="int">
+        select count(0) from cskaoyan_mall_goods
+    </select>
+
+    <!--获得商品列表 queryGoodsList-->
+    <select id="queryGoodsList" resultMap="newGoodsMap">
+        select id,`name`,brief,pic_url,is_new,is_hot,counter_price,retail_price
+         from cskaoyan_mall_goods
+         <where>
+        <if test="id !=null and id!=''">
+            and category_id=#{id}
+        </if>
+        <if test="keyword !=null and keyword!=''">
+                 and name like "%" #{keyword} "%"
+        </if>
+        </where>
+
+    </select>
+
+    <!--获得商品的目录queryCategoryListy-->
+
+    <select id="queryWxCategoryList" resultMap="wxcategoryMap">
+        select id,`name`,keywords,`desc`,pid,icon_url,pic_url,`level`,
+        sort_order,add_time,update_time,deleted from cskaoyan_mall_category
+    </select>
+
+
+    <!--查找商品的所有评论 showType 0全部 ，1有图-->
+    <resultMap id="userCommentMap" type="com.cskaoyan.vo.wx.comment.WxCommentVo">
+        <result column="add_time" property="addTime"/>
+        <result column="pic_urls" property="picList"/>
+        <result column="content" property="content"/>
+        <association property="userInfo" javaType="com.cskaoyan.vo.wx.login.UserInfoVo">
+            <result column="nickname" property="nickName"/>
+            <result column="avatar" property="avatarUrl"/>
+        </association>
+    </resultMap>
+    <select id="queryUserComment" resultMap="userCommentMap">
+        select mc.add_time,mc.pic_urls,mc.content ,mu.nickname,mu.avatar from cskaoyan_mall_comment mc
+        LEFT JOIN cskaoyan_mall_user mu
+        on mc.user_id = mu.id
+        where value_id = #{comment.valueId}
+        And mc.type = #{comment.type}
+        <if test="comment.showType == 1">
+            And mc.has_picture = 1
+        </if>
+
+    </select>
+
+    <!--获取有图片评论个数-->
+    <select id="commentPicCountById" resultType="int">
+        select count(0) from cskaoyan_mall_comment where
+        value_id = #{valueId}
+        And type =  #{type}
+        AND has_picture = 1
+    </select>
+
+    <!--获取所有评论个数-->
+    <select id="commentAllCountById" resultType="int">
+        select count(0) from cskaoyan_mall_comment where
+        value_id = #{valueId}
+        And type = #{type}
+
+    </select>
+
+
+    <!--获得商品详情 -->
+    <select id="queryWxGoodsById" resultMap="goodsVo">
+        select
+        <include refid="base_column_list"/>
+        from cskaoyan_mall_goods where id=#{id}
+    </select>
+
+    <!--单独查询规格名称-->
+    <!--<select id="queryWxSpecificationNameById" resultType="string">-->
+        <!--select specification from cskaoyan_mall_goods_specification where goods_id=#{id} limit 1-->
+    <!--</select>-->
+
+    <!--查询规格queryWxSpecification-->
+    <select id="queryWxSpecification" resultMap="specificationMap">
+        select id,goods_id,specification,`value`,pic_url,add_time,update_time,deleted
+        from cskaoyan_mall_goods_specification where goods_id=#{id}
+    </select>
+
+    <!--查询优惠劵 -->
+    <resultMap id="wxGrouponMap" type="com.cskaoyan.vo.wx.wxgoods.WxGrouponVo">
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="discount" column="discount"/>
+        <result property="discountMember" column="discount_member"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="deleted" column="deleted"/>
+
+    </resultMap>
+    <select id="queryWxGroupon" resultMap="wxGrouponMap">
+     select id,goods_id,goods_name,pic_url,discount,discount_member,add_time,update_time,
+     expire_time,deleted from cskaoyan_mall_groupon_rules
+     where goods_id=#{id}
+    </select>
+
+    <!--查询问题 queryWxIssue-->
+    <resultMap id="wxIssueMap" type="com.cskaoyan.vo.wx.wxgoods.WxIssueVo">
+        <result property="id" column="id"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryWxIssue" resultMap="wxIssueMap">
+    select id,question,answer,add_time,update_time,deleted
+    from cskaoyan_mall_issue
+    </select>
+
+    <!--查询商品参数表-->
+    <select id="queryWxAttribute" resultMap="goodsAttributesMap">
+         select id ,goods_id,attribute,`value`,add_time,update_time,deleted
+         from cskaoyan_mall_goods_attribute
+        where goods_id=#{id}
+    </select>
+
+    <!--查询商品品牌-->
+    <resultMap id="wxBrandMap" type="com.cskaoyan.vo.wx.wxgoods.WxBrandVo">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="desc" column="desc"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="floorPrice" column="floor_price"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryWxBrand" resultMap="wxBrandMap">
+      select id,`name`,`desc`,pic_url,sort_order,floor_price,add_time,
+      update_time,deleted from cskaoyan_mall_brand where id=#{id}
+    </select>
+
+    <!--查询商品的货品 -->
+    <select id="queryWxProduct" resultMap="productMap">
+        select id,goods_id,specifications,price,`number`,url,add_time,update_time,deleted
+     from cskaoyan_mall_goods_product where goods_id=#{id}
+    </select>
+
+
+
+    <!--查询评论-->
+    <resultMap id="WxcommentMap" type="com.cskaoyan.vo.wx.wxgoods.WxVGoodsComment">
+        <result column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="pic_urls" property="picList"/>
+        <result column="add_time" property="addTime"/>
+        <result column="user_id" property="userId"/>
+    </resultMap>
+    <!--查询商品评论 -->
+    <select id="queryGoodsComment"  resultMap="WxcommentMap">
+        select
+    id,content,pic_urls,add_time,user_id
+    from cskaoyan_mall_comment where value_id=#{id}
+    </select>
+
+    <!--根据商品评论的user_id 查询用户表中的nickname,avator-->
+    <resultMap id="wxGoodsUserMap" type="com.cskaoyan.vo.wx.wxgoods.WxGoodsUser">
+        <result property="nickname" column="nickname"/>
+        <result property="avatar" column="avatar"/>
+
+    </resultMap>
+    <select id="queryWxUserById" resultMap="wxGoodsUserMap">
+        select nickname,avatar from cskaoyan_mall_user
+        where id=#{id}
+    </select>
+
+    <!--先根据商品id查询出商品分类id-->
+    <select id="queryWxGoodsCategoryById" resultType="_int">
+        select category_id from cskaoyan_mall_goods where id=#{id}
+    </select>
+    <!--商品详情页的关联商品 -->
+    <select id="queryWxGoosdRealtedById" resultMap="goodsVo">
+        select
+        <include refid="base_column_list"/>
+        from cskaoyan_mall_goods where category_id=#{id}
+    </select>
+
+    <!--插入评论-->
+    <insert id="insertComment">
+        insert into cskaoyan_mall_comment values(
+        null,
+        #{comment.valueId},
+        #{comment.type},
+        #{comment.content},
+        #{comment.userId},
+        #{comment.hasPicture},
+        #{comment.picUrls},
+        #{comment.star},
+        #{comment.addTime},
+        #{comment.updateTime},
+        #{comment.deleted}
+        )
+    </insert>
+
+    <!--查找二级标签下的所有商品-->
+    <resultMap id="goodsByCategoryMap" type="com.cskaoyan.vo.goods.GoodsVo">
+        <result column="id" property="id"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="name" property="name"/>
+        <result column="retail_price" property="retailPrice"/>
+    </resultMap>
+    <select id="queryWxGoodsByCategoryId" resultMap="goodsByCategoryMap">
+        select id,pic_url,name,retail_price from cskaoyan_mall_goods where
+        category_id = #{categoryId}
+    </select>
+
+
+</mapper>

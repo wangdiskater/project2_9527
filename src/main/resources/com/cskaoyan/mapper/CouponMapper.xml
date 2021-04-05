@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.CouponMapper">
+
+    <!--显示优惠券列表-->
+    <resultMap id="couponList" type="com.cskaoyan.bean.CouponList">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="desc" property="desc"/>
+        <result column="tag" property="tag"/>
+        <result column="discount" property="discount"/>
+        <result column="min" property="min"/>
+        <result column="days" property="days"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+    </resultMap>
+    <select id="queryCouponList" resultMap="couponList">
+        select id, `name`, `desc`, tag, discount, `min`, days, start_time, end_time
+        from cskaoyan_mall_coupon
+    </select>
+
+
+    <!--根据用户名查找对应id-->
+    <select id="queryUserIdByUsername" resultType="int">
+        select id
+        from cskaoyan_mall_user
+        where username = #{username}
+    </select>
+
+    <!--根据兑换码查找对应优惠券id-->
+    <select id="queryCouponIdByCode" resultType="int">
+        select id from cskaoyan_mall_coupon
+        where code = #{code}
+    </select>
+
+    <!--显示用户个人优惠券列表-->
+    <resultMap id="myCouponList" type="com.cskaoyan.bean.CouponList">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="desc" property="desc"/>
+        <result column="tag" property="tag"/>
+        <result column="discount" property="discount"/>
+        <result column="min" property="min"/>
+        <result column="days" property="days"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+    </resultMap>
+    <select id="queryMyCouponList" resultMap="myCouponList">
+        select c.id, c.`name`, c.`desc`, c.tag, c.`min`, c.discount, c.start_time, c.end_time
+        from cskaoyan_mall_coupon c left join cskaoyan_mall_coupon_user cu
+        on c.id = cu.coupon_id
+        where cu.user_id = #{id}
+        and cu.status = #{status}
+    </select>
+
+    <!--获取优惠券-->
+    <insert id="receiveCoupon">
+        insert into cskaoyan_mall_coupon_user
+        values (null, #{id}, #{couponId}, 0, null, null, null, 0, now(), now(), 0)
+    </insert>
+
+    <resultMap id="couponResult" type="com.cskaoyan.bean.CouponId">
+        <result column="coupon_id" property="couponId"/>
+    </resultMap>
+    <select id="checkMyCouponList" resultMap="couponResult">
+        select coupon_id
+        from cskaoyan_mall_coupon_user
+        where user_id = #{id}
+    </select>
+
+    <!--兑换优惠券-->
+    <select id="exchangeCoupon" resultType="string">
+        select code
+        from cskaoyan_mall_coupon
+        where type = 2
+    </select>
+
+    <!--兑换优惠券后更改优惠券状态-->
+    <update id="setStatus">
+        update cskaoyan_mall_coupon_user
+        set status = 1
+        where coupon_id = #{couponId}
+        and user_id = #{userId}
+    </update>
+</mapper>

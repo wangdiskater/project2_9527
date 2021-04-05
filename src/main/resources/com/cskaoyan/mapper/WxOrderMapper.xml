@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.WxOrderMapper">
+    <!--获取所有Order信息-->
+    <select id="queryOrderByUserId" resultType="com.cskaoyan.bean.Order">
+        select id,order_sn,order_status,actual_price,pay_time,confirm_time,comments,deleted,add_time,ship_time
+        from cskaoyan_mall_order where user_id = #{userId}
+        <if test="statusType == 1">
+            AND order_status in (101)
+        </if>
+        <if test="statusType == 2">
+            AND order_status in (201)
+        </if>
+        <if test="statusType == 3">
+            AND order_status in (301)
+        </if>
+        <if test="statusType == 4">
+            AND order_status in (401,402)
+        </if>
+    </select>
+
+    <!--获取OrderGoods信息-->
+    <resultMap id="orderGoodsMap" type="com.cskaoyan.vo.wx.order.WxOrderGoodsVo">
+        <result property="id" column="id"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="number" column="number"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsId" column="goods_id"/>
+    </resultMap>
+    <select id="queryOrderGoodsByOrderId" resultMap="orderGoodsMap">
+        select id ,goods_name,number,pic_url,goods_id
+        from cskaoyan_mall_order_goods
+        where order_id = #{orderId}
+    </select>
+
+    <!--通过订单id查找订单-->
+    <select id="queryOrderById" resultType="com.cskaoyan.bean.Order">
+        select consignee, address, add_time,order_sn,actual_price,
+        mobile, order_status,goods_price,coupon_price, id,
+        freight_price,integral_price,deleted,comments,ship_sn,ship_channel
+        from cskaoyan_mall_order
+        where id = #{orderId}
+    </select>
+
+    <!--查找详细订单商品信息-->
+    <resultMap id="orderDetailGoodsMap" type="com.cskaoyan.vo.wx.order.WxOrderDetailGoods">
+        <result column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="goods_sn" property="goodsSn"/>
+        <result column="product_id" property="productId"/>
+        <result column="number" property="number"/>
+        <result column="price" property="price"/>
+        <result column="specifications" property="specifications"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="comment" property="comment"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="queryOrderDetailGoodsByOrderId" resultMap="orderDetailGoodsMap">
+        select id,order_id,goods_id,goods_name,goods_sn,product_id,number,price,
+        specifications,pic_url,comment,add_time,update_time,deleted
+        from cskaoyan_mall_order_goods
+        where order_id = #{orderId}
+    </select>
+
+    <!--根据订单ID取消订单-->
+    <update id="updateOrderStateCancelById">
+        update cskaoyan_mall_order set
+        order_status = #{orderStatus},
+        update_time = #{updateTime},
+        end_time = #{updateTime}
+
+        where id = #{orderId}
+    </update>
+
+    <!--根据订单ID用户申请退货-->
+    <update id="updateOrderStateRefundById">
+        update cskaoyan_mall_order set
+        order_status = #{orderStatus},
+        update_time = #{updateTime},
+        end_time = #{updateTime}
+
+        where id = #{orderId}
+    </update>
+
+    <!--删除订单-->
+    <delete id="deleteOrderById">
+        delete from cskaoyan_mall_order where id = #{orderId}
+    </delete>
+
+    <!--删除订单里的商品-->
+    <delete id="deleteOrderGoodsByOrderId">
+        delete from cskaoyan_mall_order_goods where order_id = #{orderId}
+    </delete>
+
+    <!--获取订单商品的个数-->
+    <select id="queryOrderGoodsCountByOrderId" resultType="int">
+       select count(0) from cskaoyan_mall_order_goods where order_id = #{orderId}
+    </select>
+
+    <!--确认收货-->
+    <update id="updateOrderStateConfrimById">
+        update cskaoyan_mall_order set
+        comments = #{goodsNum},
+        order_status = #{orderStatus},
+        confirm_time = #{updateTime},
+        update_time = #{updateTime}
+        where id = #{orderId}
+    </update>
+
+    <!--获取订单单个商品-->
+    <resultMap id="orderSingleGoods" type="com.cskaoyan.vo.wx.order.WxOrderCommentGoodsVo">
+        <result property="id" column="id"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="number" column="number"/>
+        <result property="goodsSpecificationValues" column="specifications"/>
+    </resultMap>
+    <select id="queryOrderSingleGoods" resultMap="orderSingleGoods">
+        select id,pic_url,goods_name,number,specifications from cskaoyan_mall_order_goods
+        where order_id = #{orderId} AND goods_id = #{goodsId}
+    </select>
+
+    <!--插入评论-->
+    <insert id="insertComment">
+        <selectKey keyProperty="comment.id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into cskaoyan_mall_comment values(
+            null,
+            #{comment.valueId},
+            #{comment.type},
+            #{comment.content},
+            #{comment.userId},
+            #{comment.hasPicture},
+            #{comment.picUrls},
+            #{comment.star},
+            #{comment.addTime},
+            #{comment.updateTime},
+            #{comment.deleted}
+        )
+    </insert>
+
+    <!--给订单商品添加comment信息-->
+    <update id="updateOrderGoodsComment">
+        update cskaoyan_mall_order_goods set
+        comment = #{commentId}
+        where id = #{orderGoodsId}
+    </update>
+
+    <!--订单comments 减一-->
+    <update id="updateOrderComment">
+        update cskaoyan_mall_order set
+        comments = comments-1
+        where id = #{orderId}
+    </update>
+
+    <!--商品数量增加-->
+    <update id="updateGoodsProductNum">
+        update cskaoyan_mall_goods_product set
+        number = number - #{number}
+        where goods_id = #{goodsId}
+    </update>
+
+    <!--删除购物车-->
+    <delete id="deleteCartById">
+        delete from cskaoyan_mall_cart where id = #{cartId}
+    </delete>
+
+    <!--更新用户提交信息-->
+    <update id="updateOrderMessageById">
+        update cskaoyan_mall_order  set
+        message = #{message}
+        where id = #{orderId}
+    </update>
+
+    <!--更新用户支付完的状态-->
+    <update id="updateOrderStateById">
+        update cskaoyan_mall_order  set
+        order_status = #{order.order_status},
+        update_time = #{order.update_time},
+        pay_time = #{order.pay_time},
+        pay_id = #{order.pay_id}
+        where id = #{order.id}
+
+    </update>
+
+    <!--修改订单状态为系统取消-->
+    <update id="updateOrderStatusToCancelById">
+        update cskaoyan_mall_order set
+        order_status = 103
+        where id = #{orderId}
+    </update>
+
+    <!--取消评论设置comments = 0-->
+    <update id="queryOrderStatusCancelComments">
+        update cskaoyan_mall_order set
+        comments = 0
+        where id = #{orderId}
+    </update>
+</mapper>

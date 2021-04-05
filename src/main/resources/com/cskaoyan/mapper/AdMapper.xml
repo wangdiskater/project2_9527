@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <!--后台-->
+<mapper namespace="com.cskaoyan.mapper.AdMapper">
+    <sql id="getLastId">
+        select last_insert_id() as id
+    </sql>
+    <!--广告管理-->
+    <resultMap id="adListMap" type="com.cskaoyan.bean.Ad">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="link" column="link"/>
+        <result property="url" column="url"/>
+        <result property="position" column="position"/>
+        <result property="content" column="content"/>
+        <result property="enabled" column="enabled"/>
+        <result property="add_time" column="addTime"/>
+        <result property="update_time" column="updateTime"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <!--查询所有广告-->
+    <select id="queryAllAd" resultMap="adListMap">
+        select id,`name`,link,url,`position`,content,enabled,add_time,update_time,deleted
+         from cskaoyan_mall_ad
+          <where>
+              <if test="name != null and name != ''">
+                  and `name` like "%"#{name}"%"
+              </if>
+              <if test="content != null and content != ''">
+                  and content like "%"#{content}"%"
+              </if>
+          </where>
+          order by #{sort} #{order}
+    </select>
+    <!--添加广告-->
+    <insert id="insertAd">
+        <selectKey resultType="int" keyColumn="id" keyProperty="ad.id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_ad values
+        (null,#{ad.name},#{ad.link},#{ad.url},#{ad.position},#{ad.content},
+        #{ad.start_time},#{ad.end_time},#{ad.enabled},#{ad.add_time},#{ad.update_time},#{ad.deleted})
+    </insert>
+    <!--更新广告-->
+    <update id="updateAd">
+            update cskaoyan_mall_ad set name = #{ad.name},
+            link = #{ad.link},url = #{ad.url},position = #{ad.position},content = #{ad.content},
+            enabled = #{ad.enabled},update_time = #{ad.update_time},deleted = #{ad.deleted}
+            where id = #{ad.id}
+    </update>
+    <!--删除广告-->
+    <delete id="deleteAd">
+        delete from cskaoyan_mall_ad where id = #{id}
+    </delete>
+    <resultMap id="CouponMap" type="com.cskaoyan.bean.Coupon">
+    <result property="id" column="id"/>
+    <result property="name" column="name"/>
+    <result property="desc" column="desc"/>
+    <result property="tag" column="tag"/>
+    <result property="total" column="total"/>
+    <result property="discount" column="discount"/>
+    <result property="min" column="min"/>
+    <result property="limit" column="limit"/>
+    <result property="type" column="type"/>
+    <result property="status" column="status"/>
+    <result property="goods_type" column="goodsType"/>
+    <result property="goods_value" column="goodsValue"/>
+    <result property="time_type" column="timeType"/>
+    <result property="days" column="days"/>
+    <result property="add_time" column="addTime"/>
+    <result property="update_time" column="updateTime"/>
+    <result property="deleted" column="deleted"/>
+</resultMap>
+    <!--优惠券管理-->
+    <!--查询所有优惠券-->
+    <select id="queryAllCoupon" resultMap="CouponMap">
+        select id,`name`,`desc`,tag,total,discount,`min`,`limit`,`type`,status,goods_type,goods_value,
+        time_type,days,add_time,update_time,deleted from cskaoyan_mall_coupon
+        <where>
+            <if test="name != null and name != ''">
+                and `name` like "%"#{name}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and `type` = #{type}
+            </if>
+            <if test="status != null and status != ''">
+                and `status` = #{status}
+            </if>
+        </where>
+        order by #{sort} #{order}
+    </select>
+    <!--添加优惠券-->
+    <insert id="insertCoupon">
+        <selectKey resultType="int" keyColumn="id" keyProperty="cv.id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+          insert into cskaoyan_mall_coupon (id,days,`desc`,`discount`,end_time,
+          goods_type,goods_value,`code`,`limit`,`min`,`name`,start_time,status,tag,time_type,
+          total,`type`) values (null,#{cv.days},#{cv.desc},#{cv.discount},#{cv.endTime},#{cv.goodsType},
+          #{cv.goodsValue},#{cv.code},
+          #{cv.limit},#{cv.min},#{cv.name},#{cv.startTime},#{cv.status},#{cv.tag},
+          #{cv.timeType},#{cv.total},#{cv.type})
+    </insert>
+    <!--编辑优惠券-->
+    <update id="updateCoupon">
+        update cskaoyan_mall_coupon set add_time = #{cv.addTime},days = #{cv.days},`desc` = #{cv.desc},
+        discount = #{cv.discount},goods_type = #{cv.goodsType},goods_value = #{cv.goodsValue},code = #{cv.code},`limit` = #{cv.limit},
+        `min` = #{cv.min},`name` = #{cv.name},status = #{cv.status},tag = #{cv.tag},time_type = #{cv.timeType},
+        total = #{cv.total},`type` = #{cv.type},update_time = #{cv.updateTime}
+        where id = #{cv.id}
+    </update>
+    <!--删除优惠券-->
+    <delete id="deleteCoupon">
+        delete from cskaoyan_mall_coupon where id = #{id}
+    </delete>
+    <!--通过id查询详细优惠券信息-->
+    <select id="queryCouponById" resultType="com.cskaoyan.bean.Coupon">
+        select id,`name`,`desc`,tag,total,discount,`min`,`limit`,`type`,status,goods_type,goods_value,`code`,
+        time_type,days,add_time,update_time,deleted from cskaoyan_mall_coupon where id = #{id}
+    </select>
+    <!--查询优惠券使用信息-->
+    <resultMap id="listuserMap" type="com.cskaoyan.vo.ad.CouponUserVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="couponId" column="coupon_id"/>
+        <result property="status" column="status"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="usedTime" column="used_time"/>
+        <result property="orderId" column="order_id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryAllListuser" resultMap="listuserMap">
+        select id,user_id,coupon_id,status,end_time,used_time,order_id,add_time,update_time,deleted from cskaoyan_mall_coupon_user
+        where
+        coupon_id = #{couponId}
+        <if test="userId != null and userId != ''">
+            and user_id = #{userId}
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+
+        order by #{sort} #{order}
+    </select>
+    <resultMap id="TopicMap" type="com.cskaoyan.vo.ad.TopicVo">
+    <result property="id" column="id"/>
+    <result property="title" column="title"/>
+    <result property="subtitle" column="subtitle"/>
+    <result property="content" column="content"/>
+    <result property="price" column="price"/>
+    <result property="readCount" column="read_count"/>
+    <result property="picUrl" column="pic_url"/>
+    <result property="sortOrder" column="sort_order"/>
+    <result property="goods" column="goods"/>
+    <result property="addTime" column="add_time"/>
+    <result property="updateTime" column="update_time"/>
+    <result property="deleted" column="deleted"/>
+    </resultMap>
+    <!--专题管理-->
+    <!--查询所有专题信息-->
+    <select id="queryAllTopic" resultMap="TopicMap">
+        select id,title,subtitle,price,read_count,pic_url,sort_order,
+        goods,add_time,update_time,deleted,content from cskaoyan_mall_topic
+        <where>
+            <if test="title != null and title != ''">
+                and title like "%"#{title}"%"
+            </if>
+            <if test="subtitle != null and subtitle != ''">
+                and subtitle like "%"#{subtitle}"%"
+            </if>
+        </where>
+        order by #{sort} #{order}
+    </select>
+    <!--添加专题-->
+    <insert id="insertTopic">
+        <selectKey resultType="int" keyColumn="id" keyProperty="tv.id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_topic values (null,#{tv.title},#{tv.subtitle},
+        #{tv.content},#{tv.price},#{tv.readCount},#{tv.picUrl},#{tv.sortOrder},#{tv.goods},
+        #{tv.addTime},#{tv.updateTime},#{tv.deleted})
+    </insert>
+    <!--编辑专题-->
+    <update id="updateTopic">
+        update cskaoyan_mall_topic set title = #{tuv.title},subtitle = #{tuv.subtitle},price = #{tuv.price},
+        read_count = #{tuv.readCount},pic_url = #{tuv.picUrl},sort_order = #{tuv.sortOrder},
+        add_time = #{tuv.addTime},update_time= #{tuv.updateTime},deleted = #{tuv.deleted},
+        content = #{tuv.content}
+        where id = #{tuv.id}
+    </update>
+    <!--删除专题-->
+    <delete id="deleteTopic">
+        delete from cskaoyan_mall_topic where id = #{id}
+    </delete>
+
+
+    <!--查询团购规则（包含指定id 的查询）-->
+    <select id="queryAllGrouponRules" resultType="com.cskaoyan.bean.AdGoodsRules">
+    SELECT add_time,deleted,discount,discount_member,expire_time,goods_id,goods_name,id,pic_url,update_time
+    FROM cskaoyan_mall_groupon_rules
+    <where>
+        <if test="goodsId != null and goodsId != 0">
+            and goods_id = #{goodsId}
+        </if>
+    </where>
+    ORDER BY #{sort} #{order}
+    </select>
+    <!--查询mall_goods表中部分属性-->
+    <select id="queryGoodsForAddRule" resultType="com.cskaoyan.bean.AdRulesAddition">
+        SELECT `name`,pic_url from cskaoyan_mall_goods WHERE id = #{rule.goodsId}
+    </select>
+    <!--新增一个团购规则数据-->
+    <insert id="addOneRule">
+      <selectKey resultType="int" keyProperty="rule.id" keyColumn="idz" order="AFTER">
+          select last_insert_id() as idz
+      </selectKey>
+      insert into cskaoyan_mall_groupon_rules (goods_id,goods_name,pic_url,discount,discount_member,add_time,
+      update_time,expire_time,deleted) value (#{rule.goodsId},#{rule.name},#{rule.pic_url},#{rule.discount},
+      #{rule.discountMember},NOW(),NOW(),#{rule.expireTime},#{rule.deleted})
+    </insert>
+    <!--更新团购规则-->
+    <update id="updateRules">
+      update cskaoyan_mall_groupon_rules set
+      <trim suffixOverrides=",">
+          <if test="rule.discount != null">
+              discount = #{rule.discount},
+          </if>
+          <if test="rule.goodsId != 0">
+              goods_id = #{rule.goodsId},
+          </if>
+          <if test="rule.goodsName != ''">
+              goods_name = #{rule.goodsName},
+          </if>
+          <if test="rule.picUrl != ''">
+              pic_url = #{rule.picUrl},
+          </if>
+          <if test="rule.expireTime != null">
+              expire_time = #{rule.expireTime},
+          </if>
+          <if test="rule.discountMember != null">
+              discount_member = #{rule.discountMember}
+          </if>
+      </trim>
+        where id = #{rule.id}
+    </update>
+    <!--删除团购数据-->
+    <delete id="deleteRules">
+        delete from cskaoyan_mall_groupon_rules where id = #{rule.id}
+    </delete>
+    <!--查询mall_group表中所有数据-->
+    <select id="queryAllGroupon" resultType="com.cskaoyan.bean.AdGroupon">
+    SELECT id,order_id,groupon_id,rules_id,user_id,creator_user_id,
+    add_time,update_time,share_url,payed
+    FROM cskaoyan_mall_groupon
+    </select>
+    <!--查询mall_groupon_rules表中的一个数据-->
+    <select id="queryOneRules" resultType="com.cskaoyan.bean.AdGoodsRules">
+    SELECT add_time,deleted,discount,discount_member,expire_time,goods_id,goods_name,id,pic_url,update_time
+    FROM cskaoyan_mall_groupon_rules where id = #{rulesId}
+    </select>
+    <!--查询mall_goods表中的一个数据-->
+    <select id="queryOneGoods" resultType="com.cskaoyan.bean.AdGoods">
+    SELECT add_time,brand_id,brief,category_id,deleted,detail,gallery,goods_sn,id,is_hot,is_new,is_on_sale,
+    keywords,`name`,pic_url,retail_price,share_url,sort_order,unit
+    FROM cskaoyan_mall_goods where id = #{goodsId}
+    </select>
+
+    <!--前台-->
+    <resultMap id="TopicListMap" type="com.cskaoyan.vo.ad.TopicVo">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="subtitle" column="subtitle"/>
+        <result property="content" column="content"/>
+        <result property="price" column="price"/>
+        <result property="readCount" column="read_count"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="goods" column="goods"/>
+    </resultMap>
+    <!--查询所有优惠券-->
+    <resultMap id="couponHomeMap" type="com.cskaoyan.vo.wx.home.HomeCouponVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="desc" property="desc"/>
+        <result column="tag" property="tag"/>
+        <result column="discount" property="discount"/>
+        <result column="min" property="min"/>
+        <result column="days" property="days"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+    </resultMap>
+    <select id="queryAllCouponToHome" resultMap="couponHomeMap">
+        select id,name,`desc`,tag,discount,min,days ,start_time,end_time
+        from cskaoyan_mall_coupon
+    </select>
+
+    <!--查询所有团购-->
+    <resultMap id="grouponHomeMap" type="com.cskaoyan.vo.wx.home.HomeGrouponVo">
+        <result column="discount" property="groupon_price"/>
+        <result column="discount_member" property="groupon_member"/>
+        <association property="goods" column="goods_id"
+                     select="com.cskaoyan.mapper.AdMapper.queryGrouponGoods">
+
+        </association>
+    </resultMap>
+    <select id="queryAllGrouponToHome" resultMap="grouponHomeMap">
+        select goods_id,discount,discount_member from cskaoyan_mall_groupon_rules
+    </select>
+    <!--二次查询-->
+    <resultMap id="grouponGoodsMap" type="com.cskaoyan.vo.wx.home.GrouponGoodsVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="brief" property="brief"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="counter_price" property="counterPrice"/>
+        <result column="retail_price" property="retailPrice"/>
+    </resultMap>
+    <select id="queryGrouponGoods" resultMap="grouponGoodsMap">
+        select id ,name , brief,pic_url,counter_price,retail_price from cskaoyan_mall_goods where
+        id = #{goods_id}
+    </select>
+
+    <!--查询所有广告banner-->
+    <resultMap id="adHomeMap" type="com.cskaoyan.vo.ad.AdListVo">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="link" column="link"/>
+        <result property="url" column="url"/>
+        <result property="position" column="position"/>
+        <result property="content" column="content"/>
+        <result property="enabled" column="enabled"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <sql id="allTopicMessage">
+        id,title,subtitle,price,read_count,pic_url,sort_order,goods,add_time,update_time,deleted,content
+    </sql>
+    <resultMap id="TopicByIdMap" type="com.cskaoyan.vo.wx.topic.TopicByIdVo">
+    <result property="id" column="id"/>
+    <result property="title" column="title"/>
+    <result property="subtitle" column="subtitle"/>
+    <result property="price" column="price"/>
+    <result property="readCount" column="read_count"/>
+    <result property="picUrl" column="pic_url"/>
+    <result property="sortOrder" column="sort_order"/>
+    <result property="goods" column="goods"/>
+    <result property="addTime" column="add_time"/>
+    <result property="updateTime" column="update_Time"/>
+    <result property="deleted" column="deleted"/>
+    <result property="content" column="content"/>
+</resultMap>
+    <!--查询所有专题-->
+    <select id="queryTopicList" resultMap="TopicListMap">
+        select id,title,subtitle,price,read_count,pic_url from cskaoyan_mall_topic
+    </select>
+
+    <!--查询4个关联专题信息-->
+    <select id="queryTopicRelated" resultMap="TopicByIdMap">
+        select <include refid="allTopicMessage"/>
+        from cskaoyan_mall_topic
+        limit 0,4
+    </select>
+    <!--通过id查询数据-->
+    <select id="queryTopicById" resultMap="TopicByIdMap">
+        select <include refid="allTopicMessage"/>
+        from cskaoyan_mall_topic
+        where id = #{id}
+    </select>
+    <select id="queryAllAdToHome" resultMap="adHomeMap">
+        select id,name,link,url,`position`,content,enabled,add_time,update_time,deleted
+        from cskaoyan_mall_ad
+    </select>
+
+    <!--查询所有主题-->
+    <resultMap id="topicHomeMap" type="com.cskaoyan.vo.ad.TopicVo">
+        <result column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="subtitle" property="subtitle"/>
+        <result column="price" property="price"/>
+        <result column="read_count" property="readCount"/>
+        <result column="pic_url" property="picUrl"/>
+    </resultMap>
+    <select id="queryAllTopicToHome" resultMap="topicHomeMap">
+        select id,title,subtitle,price,read_count,pic_url
+        from cskaoyan_mall_topic
+    </select>
+    <select id="querySomeGroupon" resultType="com.cskaoyan.bean.AdGroupon">
+    SELECT id,order_id,groupon_id,rules_id,user_id,creator_user_id,
+    add_time,update_time,share_url,payed
+    FROM cskaoyan_mall_groupon
+        <where>
+            <if test="rules_id != null and rules_id != 0">
+                and rules_id = #{rules_id}
+            </if>
+        </where>
+    </select>
+</mapper>
+

@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://47.113.104.226:3306/db_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: wangdi123
+    type: com.alibaba.druid.pool.DruidDataSource
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/META-INF/resources/,classpath:/static,classpath:/resources/,file:D:/test/img
+
+server:
+  port: 80
+
+logging:
+  file: H:\log\project2.log
+  level:
+    com:
+      cskaoyan:
+        mapper: debug
+
+pagehelper:
+  helper-dialect: mysql
+
+#扫描转换器包
+mybatis:
+  type-handlers-package: com.cskaoyan.mybatis

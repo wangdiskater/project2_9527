@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.StorageMapper">
+    <resultMap id="storageMap" type="com.cskaoyan.vo.storage.StorageVo">
+        <result property="id" column="id"/>
+        <result property="key" column="key"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="size" column="size"/>
+        <result property="url" column="url"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <!--查找静态资源-->
+    <select id="selectStorage" resultMap="storageMap">
+        select id,`key`,`name`,`type`,`size`,`url`,add_time,update_time,deleted  from cskaoyan_mall_storage
+        where 1 = 1
+        <if test="storageSearch.key != null and storageSearch.key != ''">
+            AND `key` like #{storageSearch.key}
+        </if>
+        <if test="storageSearch.name != null and storageSearch.name != ''">
+            AND `name` like #{storageSearch.name}
+        </if>
+        Order by #{storageSearch.sort} #{storageSearch.order}
+    </select>
+
+    <!--更新静态资源-->
+    <update id="updateStorageNameById">
+        update cskaoyan_mall_storage set
+         name = #{storage.name}
+        where id = #{storage.id}
+    </update>
+
+    <!--插入静态资源-->
+    <insert id="insertStorage">
+        insert into cskaoyan_mall_storage values(
+            null,
+            #{storage.key},
+            #{storage.name},
+            #{storage.type},
+            #{storage.size},
+            #{storage.url},
+            #{storage.addTime},
+            #{storage.updateTime},
+            #{storage.deleted}
+        )
+    </insert>
+
+    <!--删除资源-->
+    <delete id="deleteStorageById">
+        delete from cskaoyan_mall_storage where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace要等于接口的全类名-->
+<mapper namespace="com.cskaoyan.mapper.CartMapper">
+    <update id="cancelChecked">
+        update cskaoyan_mall_cart set checked = 0
+        <where>
+            <if test="productId != 0">
+                 product_id = #{productId}
+            </if>
+        </where>
+    </update>
+    <update id="Checked">
+        update cskaoyan_mall_cart set checked = 1
+        <where>
+            <if test="productId != 0">
+                product_id = #{productId}
+            </if>
+        </where>
+    </update>
+    <update id="updateGoodsCount">
+        update cskaoyan_mall_cart set `number` = #{number}
+        <where>
+            <if test="id != 0">
+                id = #{id}
+            </if>
+        </where>
+    </update>
+    <delete id="deleteCart">
+        delete from cskaoyan_mall_cart where product_id = #{productId}
+    </delete>
+
+    <select id="showCarts" resultType="com.cskaoyan.bean.CartBean">
+    SELECT id,user_id,goods_id,goods_sn,goods_name,product_id,price,`number`,specifications,checked,
+    pic_url,add_time,update_time,deleted FROM cskaoyan_mall_cart
+    </select>
+    <select id="queryGoodsAttributeId" resultType="java.lang.Integer">
+        select id from cskaoyan_mall_goods_attribute where goods_id = #{gooodsId}
+    </select>
+    <select id="queryGoods" resultType="com.cskaoyan.bean.AddDataFromGoods">
+        select goods_sn,`name`,retail_price,pic_url
+         from cskaoyan_mall_goods where id = #{goodsId}
+    </select>
+    <select id="queryGoodsProduct" resultType="com.cskaoyan.bean.AddDataFromProduct">
+        select specifications from cskaoyan_mall_goods_product where goods_id = #{goodsId}
+    </select>
+    <select id="queryCartInfo" resultType="com.cskaoyan.bean.CartBean">
+        select id from cskaoyan_mall_cart where goods_id = #{goodsId}
+    </select>
+    <select id="queryGoodsNumber" resultType="java.lang.Integer">
+        select `number` from cskaoyan_mall_cart where goods_id = #{goodsId}
+    </select>
+    <select id="showCartInfo" resultType="com.cskaoyan.bean.CartBean">
+        select id,user_id,goods_id,goods_sn,goods_name,product_id,price,`number`,specifications,checked,
+    pic_url,add_time,update_time,deleted from cskaoyan_mall_cart where id = #{cartId}
+    </select>
+    <select id="checkGoodsList" resultType="com.cskaoyan.bean.AdGoods">
+        select add_time,brand_id,brief,category_id,counter_price,deleted,detail,gallery,goods_sn,id,is_hot,is_new,
+        is_on_sale,keywords,`name`,pic_url,retail_price,share_url,sort_order,unit from cskaoyan_mall_goods
+        where id = #{goodsId}
+    </select>
+    <select id="queryUserAddress" resultType="com.cskaoyan.bean.Address">
+        select id,`name`,user_id,province_id,city_id,area_id,address,mobile,is_default,deleted,add_time,update_time
+        from cskaoyan_mall_address where id = #{addressId}
+    </select>
+    <select id="queryCoupon" resultType="com.cskaoyan.bean.Coupon">
+        select total,discount from cskaoyan_mall_coupon where id = #{couponId}
+    </select>
+    <select id="queryGrouponRules" resultType="com.cskaoyan.bean.GrouponRules">
+        select discount from cskaoyan_mall_groupon_rules where id = #{grouponRulesId}
+    </select>
+    <select id="queryCart" resultType="com.cskaoyan.bean.CartBean">
+        select goods_name,`number`,specifications,price from cskaoyan_mall_cart where id = #{cartId}
+    </select>
+    <select id="queryAllChecked" resultType="com.cskaoyan.bean.CartBean">
+    SELECT id,user_id,goods_id,goods_sn,goods_name,product_id,price,`number`,specifications,checked,
+    pic_url,add_time,update_time,deleted FROM cskaoyan_mall_cart where checked = 1
+    </select>
+    <insert id="addCarts">
+        <selectKey resultType="int" keyProperty="addCarts.id" keyColumn="idx" order="AFTER">
+              select last_insert_id() as idx
+        </selectKey>
+        insert into cskaoyan_mall_cart (id,user_id,goods_id,goods_sn,goods_name,product_id,price,`number`,specifications,
+        checked,pic_url,add_time,update_time,deleted) value (null ,#{addCarts.user_id},#{addCarts.goods_id},#{addCarts.goods_sn},
+        #{addCarts.name}, #{addCarts.product_id}, #{addCarts.retail_price},#{addCarts.number},#{addCarts.specifications},
+        #{addCarts.checked}, #{addCarts.pic_url}, NOW(), NOW(),#{addCarts.deleted})
+    </insert>
+    <insert id="AddOrder">
+        <selectKey resultType="int" keyProperty="order.id" keyColumn="id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_order (user_id,order_sn,order_status,consignee,mobile,address,message,goods_price,freight_price,
+        coupon_price,integral_price,groupon_price,order_price,actual_price,add_time,update_time)
+        value (#{order.user_id},#{order.order_sn},#{order.order_status},#{order.consignee},#{order.mobile},#{order.address},#{order.message},
+        #{order.goods_price},#{order.freight_price},#{order.coupon_price},#{order.integral_price},#{order.groupon_price},#{order.order_price},
+        #{order.actual_price},now(),now())
+    </insert>
+    <insert id="AddOrderGoods">
+        insert into cskaoyan_mall_order_goods (order_id,goods_id,goods_name,goods_sn,product_id,`number`,price,specifications,
+        pic_url,comment,add_time,update_time) value (#{orderId},#{cart.goods_id},#{cart.goods_name},#{cart.goods_sn},
+        #{cart.product_id},#{cart.number},#{cart.price},#{cart.specifications},
+        #{cart.pic_url},0,now(),now())
+    </insert>
+    <update id="updateCarts">
+        update cskaoyan_mall_cart set `number` = #{addCarts.number} ,update_time = now()
+        where goods_id = #{goodsId}
+    </update>
+
+    <!--删除选中的购物车中的商品-->
+    <delete id="deleteAllchecked">
+        delete from cskaoyan_mall_cart where checked = 1
+    </delete>
+
+    <!--减少库存-->
+    <update id="reduceProductById">
+        update cskaoyan_mall_goods_product set
+        number = number - #{number}
+
+        where id = #{id}
+    </update>
+
+    <!--判断库存是否足够-->
+    <select id="queryProductNumById" resultType="int">
+        select number from cskaoyan_mall_goods_product where id = #{id}
+    </select>
+
+    <!--通过cartId拿Cart数据-->
+    <select id="queryByCartId" resultType="com.cskaoyan.bean.CartBean">
+    SELECT id,user_id,goods_id,goods_sn,goods_name,product_id,price,`number`,specifications,checked,
+    pic_url,add_time,update_time,deleted FROM cskaoyan_mall_cart where
+    id = #{cartId}
+    </select>
+</mapper>

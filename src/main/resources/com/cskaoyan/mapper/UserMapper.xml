@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cskaoyan.mapper.UserMapper">
+
+    <!--会员管理功能模块的实现-->
+    <resultMap id="usersVo" type="com.cskaoyan.vo.user.UserVo">
+        <result property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="gender" column="gender"/>
+        <result property="birthday" column="birthday"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="lastLoginIp" column="last_login_ip"/>
+        <result property="userLevel" column="user_level"/>
+        <result property="nickname" column="nickname"/>
+        <result property="mobile" column="mobile"/>
+        <result property="avatar" column="avatar"/>
+        <result property="weixinOpenid" column="weixin_openid"/>
+        <result property="status" column="status"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+
+    </resultMap>
+    <select id="queryAllUser" resultMap="usersVo">
+        select id,username,password,gender,birthday,last_login_time,last_login_ip,user_level,
+        nickname,mobile,avatar,weixin_openid,status,add_time,update_time from cskaoyan_mall_user
+        <where>
+            <if test="username!=null and username!=''">
+                and username like "%"#{username}"%"
+            </if>
+            <if test="mobile!=null and mobile!=''">
+                and mobile like "%"#{mobile}"%"
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+
+    <!--根据用户id 查询用户信息-->
+    <select id="queryUserById" resultMap="usersVo">
+        select id,username,password,gender,birthday,last_login_time,last_login_ip,user_level,
+        nickname,mobile,avatar,weixin_openid,status,add_time,update_time
+        from cskaoyan_mall_user
+        where id=#{id}
+    </select>
+
+
+
+<!--    //会员收藏功能的实现-->
+    <resultMap id="userCollects" type="com.cskaoyan.vo.user.UserCollectVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="valueId" column="value_id"/>
+        <result property="type" column="type"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="queryAllUserCollect" resultMap="userCollects">
+        select id,user_id,value_id,`type`,add_time,update_time,deleted
+        from cskaoyan_mall_collect
+        <where>
+            <if test="valueId!=null and valueId!=''">
+                and value_id=#{valueId}
+            </if>
+            <if test="userId !=null and userId !=''">
+                and user_id=#{userId}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+
+    <!--会员足迹功能的实现-->
+    <resultMap id="userFootPrint" type="com.cskaoyan.vo.user.FootPrintVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="queryAllUserFootPrint" resultMap="userFootPrint">
+        select id,user_id,goods_id,add_time,update_time,deleted
+        from cskaoyan_mall_footprint
+        <where>
+            <if test="userId!= null and userId !=''">
+                and user_id=#{userId}
+            </if>
+            <if test="goodsId!= null and goodsId!=''">
+                and goods_id=#{goodsId}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+    <!--用户管理模块的搜索历史-->
+    <resultMap id="userHistory" type="com.cskaoyan.vo.user.HistoryVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="keyword" column="keyword"/>
+        <result property="from" column="from"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="queryUserHistory" resultMap="userHistory">
+        select id,user_id,keyword,`from`,add_time,update_time,deleted
+        from cskaoyan_mall_search_history
+        <where>
+            <if test="keyword !=null and keyword!=''">
+                and keyword like '%' #{keyword} '%'
+            </if>
+            <if test="userId !=null and userId!=''">
+                and user_id=#{userId}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+    <!--用户模块的意见反馈功能-->
+    <resultMap id="UserFeedback" type="com.cskaoyan.vo.user.FeedbackVo">
+        <result property="id" column="id"/>
+        <result property="userld" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="mobile" column="mobile"/>
+        <result property="feedType" column="feed_type"/>
+        <result property="content" column="content"/>
+        <result property="status" column="status"/>
+        <result property="hasPicture" column="has_picture"/>
+        <result property="picUrls" column="pic_urls"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="queryUserFeedBack" resultMap="UserFeedback">
+        select id,user_id,username,mobile,feed_type,content,
+        status,has_picture,pic_urls,add_time,update_time,deleted
+        from cskaoyan_mall_feedback
+        <where>
+            <if test="username!=null and username!=''">
+                and username like "%" #{username} "%"
+            </if>
+            <if test="id!=null and id != ''">
+                and id=#{id}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+    <!--收货地址功能的实现-->
+    <resultMap id="userAddress" type="com.cskaoyan.vo.user.AddressVo">
+        <result property="isDefault" column="is_default"/>
+        <result property="address" column="address"/>
+        <result property="name" column="name"/><!--收货人-->
+        <result property="mobile" column="mobile"/>
+        <result property="id" column="id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="areaId" column="area_id"/>
+        <result property="cityId" column="city_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="provinceId" column="province_id"/>
+        <!--区-->
+        <association property="area" column="area_id" select="com.cskaoyan.mapper.UserMapper.queryUserAreaById"/>
+        <!--省-->
+        <association property="province" column="province_id" select="com.cskaoyan.mapper.UserMapper.queryUserProviceById"/>
+        <!--市-->
+        <association property="city" column="city_id" select="com.cskaoyan.mapper.UserMapper.queryUserCityById"/>
+    </resultMap>
+
+    <select id="queryUserAddress" resultMap="userAddress">
+     select
+      id,`name`,user_id,add_time,province_id,city_id,area_id,address,mobile,is_default
+      from cskaoyan_mall_address
+      <where>
+          <if test="userId!=null and userId!=''">
+              and user_id=#{userId}
+          </if>
+          <if test="name!=null and name!=''">
+              and `name` like "%"#{name}"%"
+          </if>
+      </where>
+        order by add_time desc
+    </select>
+
+    <!--省-->
+    <select id="queryUserProviceById" resultType="string">
+     select `name` as province from cskaoyan_mall_region  where id =#{province_id}
+    </select>
+
+    <!--市-->
+    <select id="queryUserCityById" resultType="string">
+     select `name` as city from cskaoyan_mall_region  where id =#{city_id}
+    </select>
+
+    <!--区-->
+    <select id="queryUserAreaById" resultType="string">
+     select `name` as area from cskaoyan_mall_region  where id =#{area_id}
+    </select>
+
+    <select id="queryUserCount" resultType="int">
+        select count(id) from cskaoyan_mall_user
+    </select>
+    <!--前台-显示所有收货地址-->
+    <resultMap id="Address" type="com.cskaoyan.vo.user.AddressVo">
+        <result property="isDefault" column="is_default"/>
+        <result property="address" column="address"/>
+        <result property="name" column="name"/><!--收货人-->
+        <result property="mobile" column="mobile"/>
+        <result property="id" column="id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="areaId" column="area_id"/>
+        <result property="cityId" column="city_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="provinceId" column="province_id"/>
+        <!--区-->
+        <association property="area" column="area_id" select="com.cskaoyan.mapper.UserMapper.queryAreaById"/>
+        <!--省-->
+        <association property="province" column="province_id" select="com.cskaoyan.mapper.UserMapper.queryProvinceById"/>
+        <!--市-->
+        <association property="city" column="city_id" select="com.cskaoyan.mapper.UserMapper.queryCityById"/>
+    </resultMap>
+    <!--省-->
+    <select id="queryProvinceById" resultType="string">
+     select `name` as provinceName from cskaoyan_mall_region  where id = #{province_id}
+    </select>
+
+    <!--市-->
+    <select id="queryCityById" resultType="string">
+     select `name` as cityName from cskaoyan_mall_region  where id = #{city_id}
+    </select>
+
+    <!--区-->
+    <select id="queryAreaById" resultType="string">
+     select `name` as areaName from cskaoyan_mall_region  where id = #{area_id}
+    </select>
+    <select id="queryAllAddress" resultMap="Address">
+      select
+      id,`name`,user_id,add_time,province_id,city_id,area_id,address,mobile,is_default
+      from cskaoyan_mall_address
+    </select>
+    <!--前台-通过id查询详细收货地址-->
+    <resultMap id="AddressDetail" type="com.cskaoyan.vo.wx.address.AddressDetailVo">
+        <result property="isDefault" column="is_default"/>
+        <result property="address" column="address"/>
+        <result property="name" column="name"/><!--收货人-->
+        <result property="mobile" column="mobile"/>
+        <result property="id" column="id"/>
+        <result property="areaId" column="area_id"/>
+        <result property="cityId" column="city_id"/>
+        <result property="provinceId" column="province_id"/>
+        <!--区-->
+        <association property="areaName" column="area_id" select="com.cskaoyan.mapper.UserMapper.queryAreaById"/>
+        <!--省-->
+        <association property="provinceName" column="province_id" select="com.cskaoyan.mapper.UserMapper.queryProvinceById"/>
+        <!--市-->
+        <association property="cityName" column="city_id" select="com.cskaoyan.mapper.UserMapper.queryCityById"/>
+    </resultMap>
+    <select id="queryAddressDetail" resultMap="AddressDetail">
+      select
+      id,`name`,user_id,add_time,province_id,city_id,area_id,address,mobile,is_default
+      from cskaoyan_mall_address
+      where id = #{id}
+    </select>
+    <!--前台-返回一个id值-->
+    <select id="queryAddressCount" resultType="int">
+        select count(id) from cskaoyan_mall_address
+    </select>
+    <!--前台-新增收货地址-->
+    <insert id="insertAddress">
+        insert into cskaoyan_mall_address set address = #{asv.address},area_id = #{asv.areaId},user_id = #{userId},
+        city_id = #{asv.cityId},id = #{asv.id},is_default = #{asv.isDefault},add_time = #{asv.addTime},
+        update_time = #{asv.updateTime},mobile = #{asv.mobile},name = #{asv.name},province_id = #{asv.provinceId}
+    </insert>
+    <!--前台-更新收货地址-->
+    <update id="updateAddress">
+        update cskaoyan_mall_address set address = #{asv.address},area_id = #{asv.areaId},
+        city_id = #{asv.cityId},id = #{asv.id},is_default = #{asv.isDefault},update_time = #{asv.updateTime},
+        mobile = #{asv.mobile},name = #{asv.name},province_id = #{asv.provinceId}
+        where id = #{asv.id}
+    </update>
+    <update id="updateIsDefault">
+        update cskaoyan_mall_address set is_default = 0 where is_default = 1
+    </update>
+    <select id="queryAddressId" resultType="com.cskaoyan.bean.Address">
+        select id from cskaoyan_mall_address order by id desc limit 0,1
+    </select>
+    <!--前台-删除收货地址-->
+    <delete id="deleteAddress">
+        delete from cskaoyan_mall_address where id = #{id}
+    </delete>
+    <!--通过账号密码查找小程序用户的信息-->
+    <select id="queryUserByUsernamePsw" resultType="com.cskaoyan.bean.User">
+        select id,nickname,avatar from cskaoyan_mall_user where
+        username = #{username} Or mobile = #{username} and password = #{password}
+    </select>
+    <!--判断是否存在该用户名-->
+    <select id="existUser" resultType="int">
+        select count(0) from cskaoyan_mall_user where
+        username = #{username} OR mobile = #{mobile}
+    </select>
+
+    <!--插入新的用户-->
+    <insert id="inserUser">
+        insert into cskaoyan_mall_user (id,username,password,mobile) value(
+        null,
+        #{user.username},
+        #{user.password},
+        #{user.mobile}
+        )
+    </insert>
+    <!--前台添加意见反馈-->
+    <insert id="feedBackSubmit">
+        insert into cskaoyan_mall_feedback set content = #{feedBack.content},
+        feed_type = #{feedBack.feedType},has_picture = #{feedBack.hasPicture},
+        mobile = #{feedBack.mobile},pic_urls = #{feedBack.picUrls},
+        user_id = #{userId},username = #{username},
+        add_time = #{feedBack.addTime},update_time = #{feedBack.updateTime}
+    </insert>
+    <!--前台获取足迹列表-->
+    <resultMap id="wxFootPrint" type="com.cskaoyan.vo.wx.foot.FootprintVo">
+        <result property="id" column="id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="goodsId" column="goods_id"/>
+        <association property="name" column="goods_id" select="com.cskaoyan.mapper.UserMapper.queryNameByGoodsId"/>
+        <association property="brief" column="goods_id" select="com.cskaoyan.mapper.UserMapper.queryBriefByGoodsId"/>
+        <association property="picUrl" column="goods_id" select="com.cskaoyan.mapper.UserMapper.queryPicUrlByGoodsId"/>
+        <association property="retailPrice" column="goods_id" select="com.cskaoyan.mapper.UserMapper.queryRetailPriceByGoodsId"/>
+    </resultMap>
+    <select id="queryNameByGoodsId" resultType="String">
+        select `name` from cskaoyan_mall_goods where id = #{goods_id}
+    </select>
+    <select id="queryBriefByGoodsId" resultType="String">
+        select `brief` from cskaoyan_mall_goods where id = #{goods_id}
+    </select>
+    <select id="queryPicUrlByGoodsId" resultType="String">
+        select pic_url from cskaoyan_mall_goods where id = #{goods_id}
+    </select>
+    <select id="queryRetailPriceByGoodsId" resultType="double">
+        select retail_price from cskaoyan_mall_goods where id = #{goods_id}
+    </select>
+    <select id="queryFootPrint" resultMap="wxFootPrint">
+        select id,add_time,goods_id from cskaoyan_mall_footprint
+    </select>
+    <!--修改用户密码-->
+    <update id="updateUserPassword">
+        update cskaoyan_mall_user set password = #{user.password}
+        where mobile = #{user.mobile}
+    </update>
+
+    <!--验证是否登录-->
+    <select id="queryUserLoginByUserName" resultType="int">
+        select count (0)from cskaoyan_mall_user where
+        username = #{username} or mobile = #{username}
+        AND login = 1
+    </select>
+
+    <!--修改用户登录状态-->
+    <update id="updateUserLoginStatus">
+        update cskaoyan_mall_user set
+        login = 1
+        where username = #{username}
+        or mobile = #{username}
+    </update>
+
+    <!--添加Ip信息-->
+    <update id="updateIp">
+        update cskaoyan_mall_user set
+        last_login_ip = #{ip}
+        where username = #{username} Or mobile = #{username}
+    </update>
+
+    <!--添加足迹-->
+    <insert id="addFootPrint">
+        insert into cskaoyan_mall_footprint values(
+        null,
+        #{footPrint.user_id},
+        #{footPrint.goods_id},
+        #{footPrint.add_time},
+        #{footPrint.update_time},
+        #{footPrint.deleted}
+        )
+    </insert>
+
+    <!--判断是否存在该商品的足迹-->
+    <select id="existGoodsFootPrint" resultType="int">
+        select count(0) from cskaoyan_mall_footprint where goods_id = #{goodsId}
+    </select>
+
+    <!--delete旧的商品足迹-->
+    <update id="deleteFootPrint">
+      delete from cskaoyan_mall_footprint where goods_id = #{footPrint.goods_id}
+    </update>
+</mapper>

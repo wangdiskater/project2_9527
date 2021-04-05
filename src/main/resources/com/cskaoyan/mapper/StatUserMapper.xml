@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace要等于接口的全类名-->
+<mapper namespace="com.cskaoyan.mapper.StatUserMapper">
+
+    <select id="queryStatUser" resultType="com.cskaoyan.bean.StatUserRows">
+        SELECT add_time as `date`,COUNT(id) as users FROM cskaoyan_mall_user
+        where add_time  >= #{time1}  AND add_time  <![CDATA[ < ]]> #{time2}  ORDER BY ID DESC
+    </select>
+    <select id="queryRegistrationDate" resultType="java.util.Date">
+        select DISTINCT DATE_FORMAT(add_time,'%Y-%m-%d') `time` FROM cskaoyan_mall_user m GROUP BY `time` ASC
+    </select>
+    <select id="queryChangeDate" resultType="java.util.Date">
+        select DATE_FORMAT(#{date},'%Y-%m-%d');
+    </select>
+    <select id="addOneOnChangeDate" resultType="java.util.Date">
+        select date_add(#{date},INTERVAL '1' day) as addoneday;
+    </select>
+
+</mapper>

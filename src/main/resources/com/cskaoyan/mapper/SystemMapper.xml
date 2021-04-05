@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.SystemMapper">
+
+    <!--管理员模块-->
+    <resultMap id="adminMap" type="com.cskaoyan.bean.Admin">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="role_ids" property="roleIds"/>
+    </resultMap>
+    <select id="querySystemAdmin" resultMap="adminMap">
+        select id, username, avatar, role_ids from cskaoyan_mall_admin
+        <where>
+            <if test="username != null and username != ''">
+                username like "%" #{username} "%"
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+    <insert id="createSystemAdmin">
+        insert into cskaoyan_mall_admin values
+        (null, #{username}, #{password}, null, null, #{avatar}, null, #{updateTime}, null, #{roleIds})
+    </insert>
+
+
+    <select id="queryAdminRole" resultType="com.cskaoyan.bean.RoleofAdmin">
+        select id, name from cskaoyan_mall_role
+    </select>
+
+    <update id="updateSystemAdmin">
+        update cskaoyan_mall_admin
+        set username = #{username}, password = #{password}, avatar = #{avatar},
+        update_time = now(), role_ids = #{roleIds}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSystemAdmin">
+        delete from cskaoyan_mall_admin where username = #{username}
+    </delete>
+
+
+    <!--*******************************************分割线*****************************************-->
+
+
+    <!--操作日志系列模块-->
+    <resultMap id="logMap" type="com.cskaoyan.bean.LogList">
+        <result column="id" property="id"/>
+        <result column="admin" property="admin"/>
+        <result column="ip" property="ip"/>
+        <result column="type" property="type"/>
+        <result column="action" property="action"/>
+        <result column="status" property="status"/>
+        <result column="result" property="result"/>
+        <result column="comment" property="comment"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="querySystemLog" resultMap="logMap">
+        select id, admin, ip, type, action, status, result, comment,
+        add_time, update_time, deleted from cskaoyan_mall_log
+        <where>
+            <if test="admin != null and admin != ''">
+                admin like '%' #{admin} '%'
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+
+
+    <!--角色管理-->
+
+    <!--角色管理显示-->
+    <select id="selectRole" resultType="com.cskaoyan.bean.Role">
+        select id,name,`desc`,enabled,add_time,update_time,deleted
+        from cskaoyan_mall_role where 1 = 1
+        <if test="roleSearch.name != null and roleSearch.name != ''">
+            AND name like '%' #{roleSearch.name} '%'
+        </if>
+        ORDER BY #{roleSearch.sort} #{roleSearch.order}
+    </select>
+
+    <!--添加角色-->
+    <insert id="insertRole">
+        <selectKey resultType="int" keyColumn="id" keyProperty="role.id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_role values(
+        null,
+        #{role.name},
+        #{role.desc},
+        #{role.enabled},
+        #{role.add_time},
+        #{role.update_time},
+        #{role.deleted}
+        )
+    </insert>
+
+    <!--修改基本信息-->
+    <update id="updateRoleById">
+        update cskaoyan_mall_role set
+        name = #{role.name},
+        `desc` = #{role.desc},
+        enabled = #{role.enabled},
+        add_time = #{role.add_time},
+        update_time = #{role.update_time},
+        deleted = #{role.deleted}
+        where id = #{role.id}
+    </update>
+
+    <!--删除角色-->
+    <delete id="deleteRoleById">
+        delete from cskaoyan_mall_role where id = #{id}
+    </delete>
+
+    <!--查询角色的权限-->
+    <select id="queryRolePermissionByRoleId" resultType="string">
+        select permission from cskaoyan_mall_permission where role_id = #{role_id}
+    </select>
+
+    <!--插入权限表-->
+    <insert id="insertPermission">
+        insert into cskaoyan_mall_perems values(
+        #{permission.ids},
+        #{permission.id},
+        #{permission.label},
+        #{permission.pid},
+        #{permission.api}
+        )
+    </insert>
+
+    <!--显示所有的权限-->
+    <resultMap id="permsMap" type="com.cskaoyan.vo.system.PermissionsChildVo">
+        <result column="id" property="ids"/>
+        <result column="id_perms" property="id"/>
+        <result column="label" property="label"/>
+        <result column="pid" property="pid"/>
+        <result column="api" property="api"/>
+    </resultMap>
+    <select id="queryAllPermission" resultMap="permsMap">
+        select id,id_perms,label,pid,api from cskaoyan_mall_perms
+    </select>
+    <!--查找用户所有权限-->
+    <select id="queryAllRolePermission" resultType="string">
+        select perme_name from cskaoyan_mall_permission_perms
+    </select>
+
+    <!--删除角色的权限-->
+    <delete id="deletePermissionsByRoleId">
+        delete from cskaoyan_mall_permission where role_id = #{id}
+    </delete>
+
+    <!--添加角色权限-->
+    <insert id="insertRolePermissionsByRoleId">
+        insert into cskaoyan_mall_permission values (
+        null,
+        #{permission.role_id},
+        #{permission.permission},
+        #{permission.add_time},
+        #{permission.update_time},
+        #{permission.deleted}
+        )
+    </insert>
+</mapper>

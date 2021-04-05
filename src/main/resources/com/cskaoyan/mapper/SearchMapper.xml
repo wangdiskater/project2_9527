@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.SearchMapper">
+
+
+    <!--默认搜索关键字查询-->
+    <select id="searchDefaultKeyword" resultType="com.cskaoyan.bean.Goods">
+        select id, keyword, url, is_hot, is_default, sort_order, add_time, update_time, deleted
+        from cskaoyan_mall_keyword
+        where sort_order = 1
+    </select>
+
+    <!--热门搜索关键字查询-->
+    <select id="searchHotKeywordList" resultType="com.cskaoyan.bean.Goods">
+        select id, keyword, url, is_hot, is_default, sort_order, add_time, update_time, deleted
+        from cskaoyan_mall_keyword
+        <where>
+            is_hot = 1
+        </where>
+        order by sort_order asc
+    </select>
+
+    <!--查询搜索记录-->
+    <select id="searchHistoryKeywordList" resultType="com.cskaoyan.bean.HistoryKeywordList">
+        select keyword
+        from cskaoyan_mall_search_history
+        order by add_time desc
+
+    </select>
+
+    <!--清空搜索记录-->
+    <delete id="clearHistory">
+        delete from cskaoyan_mall_search_history
+    </delete>
+
+    <!--模糊查询搜索记录-->
+    <select id="queryHistoryByKeyword" resultType="string">
+        select keyword from cskaoyan_mall_search_history
+        <where>
+            keyword like "%" #{keyword} "%"
+        </where>
+
+    </select>
+
+
+  <!--查询帮助SearchHelper-->
+    <insert id="searchHelper">
+        insert into cskaoyan_mall_search_history values
+        (null, 1, #{keyword}, 'wx', now(), now(), 0)
+
+    </insert>
+</mapper>

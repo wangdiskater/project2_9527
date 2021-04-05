@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.MallManageMapper">
+    <!--共用sql语句-->
+    <sql id="getLastId">
+        select last_insert_id() as id
+    </sql>
+    <sql id="order_col">
+        id,user_id,order_sn,order_status,consignee,mobile,address,message,
+        goods_price,freight_price,coupon_price,integral_price,groupon_price,
+        order_price,actual_price,pay_id,pay_time,ship_sn,ship_channel,ship_time,
+        confirm_time,comments,end_time,add_time,update_time,deleted
+    </sql>
+
+
+    <!--取出行政区域-->
+    <select id="selectBrandList" resultType="com.cskaoyan.bean.Brand">
+        select id,name,`desc`,pic_url,sort_order,floor_price,add_time,update_time,deleted
+        from cskaoyan_mall_brand where 1 = 1
+        <if test="id != null and id != ''">
+           AND  id = #{id}
+        </if>
+        <if test="name != null and name != ''">
+            AND NAME = #{name}
+        </if>
+            ORDER BY #{sort} #{order}
+    </select>
+
+    <!--取出品牌制造商-->
+    <select id="selectAllRegion" resultType="com.cskaoyan.bean.Region">
+        select id,pid,`name`,`type`,code from cskaoyan_mall_region
+    </select>
+
+    <!--插入品牌-->
+    <insert id="insertBrand">
+        <selectKey resultType="int" keyColumn="id" keyProperty="brand.id" order="AFTER">
+            select last_insert_id() as id
+        </selectKey>
+        insert into cskaoyan_mall_brand values
+        (null,#{brand.name},#{brand.desc},#{brand.pic_url},#{brand.sort_order},
+        #{brand.floor_price},#{brand.add_time},#{brand.update_time},#{brand.deleted})
+    </insert>
+
+    <!--更新品牌-->
+    <update id="updateBrandById">
+        update cskaoyan_mall_brand set
+        name = #{brand.name},
+        `desc` = #{brand.desc},
+        pic_url = #{brand.pic_url},
+        sort_order = #{brand.sort_order},
+        floor_price = #{brand.floor_price},
+        add_time = #{brand.add_time},
+        update_time = #{brand.update_time},
+        deleted = #{brand.deleted}
+        where id = #{brand.id}
+    </update>
+
+    <!--删除品牌-->
+    <delete id="deleteBrandById">
+        delete from cskaoyan_mall_brand where id = #{id}
+    </delete>
+
+    <!--取出商品类目category-->
+    <select id="selectAllCategory" resultType="com.cskaoyan.bean.Category">
+        select id,name,keywords,`desc`,pid,icon_url,pic_url,`level`,sort_order,add_time,update_time,deleted
+        from cskaoyan_mall_category
+    </select>
+
+    <!--增加商品-->
+    <insert id="insertCategory">
+        <selectKey resultType="int" keyProperty="category.id" keyColumn="id">
+            <include refid="getLastId"></include>
+        </selectKey>
+        insert into cskaoyan_mall_category values (null,
+            #{category.name},
+            #{category.keywords},
+            #{category.desc},
+            #{category.pid},
+            #{category.icon_url},
+            #{category.pic_url},
+            #{category.level},
+            #{category.sort_order},
+            #{category.add_time},
+            #{category.update_time},
+            #{category.deleted}
+        )
+    </insert>
+
+    <!--更新category-->
+    <update id="updateCategoryById">
+        update cskaoyan_mall_category set
+        name = #{category.name},
+        keywords = #{category.keywords},
+        `desc` = #{category.desc},
+        pid = #{category.pid},
+        icon_url = #{category.icon_url},
+        pic_url = #{category.pic_url},
+        level = #{category.level},
+        update_time = #{category.update_time}
+        where
+        id = #{category.id}
+    </update>
+
+    <!--删除category-->
+    <delete id="deleteCategoryById">
+        delete from cskaoyan_mall_category where id = #{id}
+    </delete>
+
+    <!--拿出所有order-->
+    <select id="selectOrder" resultType="com.cskaoyan.bean.Order">
+        select
+        <include refid="order_col"/>
+        from cskaoyan_mall_order
+        where 1 = 1
+--         orderStatusArray 使用foreach
+        <if test="orderSearch.orderStatusArray != null">
+            and  order_status = #{orderSearch.orderStatusArray[0]}
+            <foreach collection="orderSearch.orderStatusArray" item="status">
+                <!--            <if test="status != null and status != ''"></if>-->
+                or  order_status = #{status}
+            </foreach>
+        </if>
+
+        <if test="orderSearch.userId != null and orderSearch.userId != ''">
+            AND user_id like '%' #{orderSearch.userId} '%'
+        </if>
+        <if test="orderSearch.orderSn != null and orderSearch.orderSn != ''">
+            AND order_sn like '%' #{orderSearch.orderSn} '%'
+        </if>
+        ORDER BY #{orderSearch.sort} #{orderSearch.order}
+    </select>
+
+
+    <!--通过id查找订单-->
+    <select id="selectOrderById" resultType="com.cskaoyan.bean.Order">
+        select
+        <include refid="order_col"/>
+        from cskaoyan_mall_order
+        where id = #{id}
+    </select>
+
+    <!--通过orderId 查找 订单对应的 wxgoods-->
+    <select id="selectOrderGoodsByOrderId" resultType="com.cskaoyan.bean.OrderGoods">
+        select
+        id,
+        order_id,
+        goods_id,
+        goods_name,
+        goods_sn,
+        product_id,
+        number,
+        price,
+        specifications,
+        pic_url,
+        comment,
+        add_time,
+        update_time,
+        deleted
+        from cskaoyan_mall_order_goods
+        where  id = #{id}
+    </select>
+
+    <!--订单发送-->
+    <update id="updateOrderShipById">
+        update cskaoyan_mall_order set
+        ship_channel = #{order.ship_channel},
+        ship_sn = #{order.ship_sn},
+        order_status = #{order.order_status},
+        ship_time = #{order.ship_time},
+        update_time = #{order.update_time}
+        where id = #{order.id}
+    </update>
+
+    <!--订单退款-->
+    <update id="updateOrderRefundById">
+        update cskaoyan_mall_order set
+        order_status = #{order.order_status},
+        end_time = #{order.end_time},
+        update_time = #{order.update_time}
+        where id = #{order.id}
+    </update>
+
+    <!--查询订单个数-->
+    <select id="queryOrderCount" resultType="int">
+        select count(id) from cskaoyan_mall_order
+    </select>
+
+    <!--查询常见问题-->
+    <select id="selectIssue" resultType="com.cskaoyan.bean.Issue">
+        select
+        id,
+        question,
+        answer,
+        add_time,
+        update_time,
+        deleted
+        from cskaoyan_mall_issue
+        where 1 = 1
+        <if test="issueSearch.question != null and issueSearch.question != ''">
+            AND  question like '%' #{issueSearch.question} '%'
+        </if>
+        ORDER BY #{issueSearch.sort} #{issueSearch.order}
+    </select>
+
+    <!--添加问题-->
+    <insert id="insertIssue">
+        <selectKey resultType="int" keyColumn="id" keyProperty="issue.id" order="AFTER">
+            <include refid="getLastId"></include>
+        </selectKey>
+        insert into cskaoyan_mall_issue
+        values(
+        null,
+        #{issue.question},
+        #{issue.answer},
+        #{issue.add_time},
+        #{issue.update_time},
+        #{issue.deleted}
+        )
+    </insert>
+
+    <!--更新问题-->
+    <update id="updateIssueById">
+        update cskaoyan_mall_issue set
+        question = #{issue.question},
+        answer = #{issue.answer},
+        add_time = #{issue.add_time},
+        update_time = #{issue.update_time},
+        deleted = #{issue.deleted}
+        where id = #{issue.id}
+    </update>
+
+    <!--删除问题-->
+    <delete id="deleteIssueById">
+        delete from cskaoyan_mall_issue where id = #{id}
+    </delete>
+
+    <!--关键词查找-->
+    <select id="selectKeywordList" resultType="com.cskaoyan.bean.Keyword">
+        select
+        id,
+        keyword,
+        url,
+        is_hot,
+        is_default,
+        sort_order,
+        add_time,
+        update_time,
+        deleted
+        from cskaoyan_mall_keyword where 1 = 1
+        <if test="keywordSearch.keyword != null and keywordSearch.keyword != ''">
+            AND  keyword like '%' #{keywordSearch.keyword} '%'
+        </if>
+        <if test="keywordSearch.url != null and keywordSearch.url != ''">
+            AND  url like '%' #{keywordSearch.url} '%'
+        </if>
+        ORDER BY #{keywordSearch.sort} #{keywordSearch.order}
+    </select>
+
+    <select id="queryAllBrand" resultType="com.cskaoyan.bean.Brand">
+        select `desc`,floor_price,id,`name`,pic_Url from cskaoyan_mall_brand
+    </select>
+    <select id="queryBrandDetail" resultType="com.cskaoyan.bean.BrandInfo">
+    SELECT id,`name`,`desc`,pic_url,sort_order,floor_price,add_time,update_time,deleted
+    FROM cskaoyan_mall_brand where id = #{id}
+    </select>
+    <select id="queryGoodsListByBrandId" resultType="com.cskaoyan.bean.GoodsInfo">
+        SELECT brief,counter_price,id,is_hot,is_new,`name`,pic_url,retail_price,category_id
+        FROM cskaoyan_mall_goods where brand_id = #{brandId}
+    </select>
+    <select id="queryCategoryInfo" resultType="com.cskaoyan.bean.CategoryInfo">
+    select id,`name`,keywords,`desc`,pid,icon_url,pic_url,`level`,sort_order,add_time,update_time,deleted
+    from cskaoyan_mall_category where id = #{categoryId}
+    </select>
+
+
+    <!--插入关键字-->
+    <insert id="insertKeyword">
+        <selectKey resultType="int" keyProperty="keyword.id" keyColumn="id" order="AFTER">
+            <include refid="getLastId"></include>
+        </selectKey>
+        insert into cskaoyan_mall_keyword
+        values(
+            null,
+            #{keyword.keyword},
+            #{keyword.url},
+            #{keyword.is_hot},
+            #{keyword.is_default},
+            #{keyword.sort_order},
+            #{keyword.add_time},
+            #{keyword.update_time},
+            #{keyword.deleted}
+        )
+    </insert>
+    <!--更新关键字-->
+    <update id="updateKeywordById">
+        update cskaoyan_mall_keyword set
+        keyword = #{keyword.keyword},
+        url = #{keyword.url},
+        is_hot = #{keyword.is_hot},
+        is_default = #{keyword.is_default},
+        sort_order = #{keyword.sort_order},
+        add_time = #{keyword.add_time},
+        update_time = #{keyword.update_time},
+        deleted = #{keyword.deleted}
+        where id = #{keyword.id}
+    </update>
+
+    <!--删除关键字-->
+    <delete id="deleteKeywordById">
+        delete from cskaoyan_mall_keyword where id = #{id}
+    </delete>
+
+    <!--获取所有一级商品类目-->
+    <select id="selectAllFirstCategory" resultType="com.cskaoyan.vo.wx.home.ChannelVo">
+        select id ,name ,icon_url from cskaoyan_mall_category where pid = 0
+    </select>
+
+    <!--查询所有品牌-->
+    <resultMap id="brandHomeMap" type="com.cskaoyan.vo.mall.BrandVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="desc" property="desc"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="floor_price" property="floorPrice"/>
+    </resultMap>
+    <select id="selectAllBrandToHome" resultMap="brandHomeMap">
+        select id,name,`desc`,pic_url,floor_price from cskaoyan_mall_brand
+    </select>
+
+    <!--查询该一级类目下的二级类目-->
+    <resultMap id="subCategoryMap" type="com.cskaoyan.vo.category.SubCategoryVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="keywords" property="keywords"/>
+        <result column="desc" property="desc"/>
+        <result column="pid" property="pid"/>
+        <result column="icon_url" property="iconUrl"/>
+        <result column="pic_url" property="picUrl"/>
+        <result column="level" property="level"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="selectSubCategoryByPid" resultMap="subCategoryMap">
+       select
+       id,name,keywords,`desc`,pid,icon_url,pic_url,level,add_time,update_time,deleted
+       from cskaoyan_mall_category where pid = #{pid}
+    </select>
+    <!--通过id 查询一级类目-->
+    <select id="selectFirstCategoryById" resultMap="subCategoryMap">
+      select
+       id,name,keywords,`desc`,pid,icon_url,pic_url,level,add_time,update_time,deleted
+       from cskaoyan_mall_category  where id = #{id}
+    </select>
+
+    <!--查询所有一级类目-->
+    <select id="selectAllFirstCategoryToCatalog" resultMap="subCategoryMap">
+       select
+       id,name,keywords,`desc`,pid,icon_url,pic_url,level,add_time,update_time,deleted
+       from cskaoyan_mall_category where pid = 0
+    </select>
+    <!--前台-通过id查询区域列表-->
+    <select id="queryRegionListById" resultType="com.cskaoyan.vo.wx.rest.RegionByIdVo">
+        select id,pid,name,type,code from cskaoyan_mall_region where pid = #{pid}
+    </select>
+
+
+</mapper>

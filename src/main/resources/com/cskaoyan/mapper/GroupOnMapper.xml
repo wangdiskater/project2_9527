@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cskaoyan.mapper.GroupOnMapper">
+
+    <resultMap id="wxGroupOnMap" type="com.cskaoyan.vo.wx.groupon.WxGroupOnVo">
+        <result property="goodsId" column="goods_id"/>
+        <result property="groupon_price" column="discount"/>
+        <result property="groupon_member" column="discount_member"/>
+    </resultMap>
+
+    <select id="queryWxGroupOnList" resultMap="wxGroupOnMap">
+          select goods_id,discount,discount_member from cskaoyan_mall_groupon_rules
+    </select>
+
+    <resultMap id="wxGroupOnGoodsMap" type="com.cskaoyan.vo.wx.groupon.WxGroupGoodsVo">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="brief" column="brief"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="counterPrice" column="counter_price"/>
+        <result property="retailPrice" column="retail_price"/>
+    </resultMap>
+    <select id="queryWxGroupOnGoods" resultMap="wxGroupOnGoodsMap">
+        select id,`name`,brief,pic_url,counter_price,retail_price from cskaoyan_mall_goods
+        where id=#{id}
+    </select>
+
+    <!--
+    //团购API-我的团购
+    //首先根据username查询出对应的用户id
+    -->
+    <select id="queryUserIdByName" resultType="_int">
+        select id from cskaoyan_mall_user where username=#{username}
+    </select>
+    <!--根据前端传来的showType和用户id 查询GroupOn  -->
+    <resultMap id="myWxGroupOnMap" type="com.cskaoyan.vo.wx.groupon.WxMyGrouponVoList">
+        <result property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="grouponId" column="groupon_id"/>
+        <result property="rulesId" column="rules_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="creatorUserId" column="creator_user_id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="share_url" column="shareUrl"/>
+        <result property="payed" column="payed"/>
+        <result property="deleted" column="deleted"/>
+
+    </resultMap>
+    <select id="queryMyWxGroupOn" resultMap="myWxGroupOnMap">
+        select id,order_id,groupon_id,rules_id,user_id,creator_user_id,add_time,update_time,
+        share_url,payed,deleted from cskaoyan_mall_groupon
+        <where>
+            <if test="id==0">
+                groupon_id=#{id} and user_id=#{userId} and creator_user_id=#{userId}
+            </if>
+            <if test="id==1">
+                groupon_id=#{id} and user_id=#{userId} limit 1
+            </if>
+        </where>
+    </select>
+
+    <!--根据orderId查询orderSn -->
+    <resultMap id="MyWxOrderMap" type="com.cskaoyan.vo.wx.groupon.MyWxOrderVo">
+        <result property="orderSn" column="order_sn"/>
+        <result property="actualPrice" column="actual_price"/>
+        <result property="orderStatus" column="order_status"/>
+    </resultMap>
+    <select id="queryMyOrder" resultMap="MyWxOrderMap">
+      select order_sn,actual_price,order_status from cskaoyan_mall_order where id=#{id}
+    </select>
+
+    <!--查询拼团人数 -->
+    <select id="queryJoinerCount" resultType="_int">
+        select count(*) from cskaoyan_mall_groupon where groupon_id=#{id}
+    </select>
+
+    <!--查询对应商品的id -->
+    <select id="queryWxMyGoodsId" resultType="_int">
+        	select goods_id from cskaoyan_mall_groupon_rules where id=#{id}
+    </select>
+    <!--查询商品list-->
+    <resultMap id="wxMyGoodsListMaps" type="com.cskaoyan.vo.wx.groupon.MyWxGoodsListVo">
+        <result property="picUrl" column="pic_url"/>
+        <result property="id" column="id"/>
+        <result property="goodsName" column="name"/>
+    </resultMap>
+    <select id="queryWxMyGoodsList" resultMap="wxMyGoodsListMaps">
+        select id,pic_url,name from cskaoyan_mall_goods where id=#{id}
+    </select>
+
+    <!--查询拼团规则 rules -->
+    <resultMap id="WxMyRulesMaps" type="com.cskaoyan.vo.wx.groupon.WxMyGoodsRulesVo">
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="discount" column="discount"/>
+        <result property="discountMember" column="discount_member"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <!--queryWxMyRules-->
+    <select id="queryWxMyRules" resultMap="WxMyRulesMaps">
+         select id,goods_id,goods_name,pic_url,discount,discount_member,add_time,update_time,expire_time,deleted
+        from cskaoyan_mall_groupon_rules where id=#{id}
+    </select>
+
+    <!--团购API  详情-->
+    <!--1、查询团购详情queryWxGrouponDetail-->
+    <select id="queryWxGrouponDetail" resultMap="myWxGroupOnMap">
+         select id,order_id,groupon_id,rules_id,user_id,creator_user_id,add_time,update_time,
+        share_url,payed,deleted from cskaoyan_mall_groupon
+        where id=#{id}
+    </select>
+    <!--2、通过groupon的user_id查询出creator的信息-->
+    <resultMap id="wxCreatorMap" type="com.cskaoyan.vo.wx.groupon.WxGroupOnCreator">
+        <result property="nickname" column="nickname"/>
+        <result property="avatar" column="avatar"/>
+    </resultMap>
+    <select id="queryWxCreatorById" resultMap="wxCreatorMap">
+        select nickname,avatar from cskaoyan_mall_user where id=#{id}
+    </select>
+    <!--3、通过groupon的creator_user_id查询出joiners的list信息-->
+    <select id="queryWxCreatorListById" resultMap="wxCreatorMap">
+        select nickname,avatar from cskaoyan_mall_user where id=#{id}
+    </select>
+
+  <!--4、通过groupon的order_id查询出orderInfo的信息-->
+        <resultMap id="wxOrderInfoMap" type="com.cskaoyan.vo.wx.groupon.WxGroupOnOrderInfoVo">
+        <result property="consignee" column="consignee"/>
+        <result property="address" column="address"/>
+        <result property="addTime" column="add_time"/>
+        <result property="orderSn" column="order_sn"/>
+        <result property="actualPrice" column="actual_price"/>
+        <result property="mobile" column="mobile"/>
+        <result property="goodsPrice" column="goods_price"/>
+        <result property="id" column="id"/>
+        <result property="freightPrice" column="freight_price"/>
+    </resultMap>
+    <select id="queryWxOrderInfoById" resultMap="wxOrderInfoMap">
+   select consignee,address,address ,add_time,order_sn,actual_price,mobile,goods_price,
+   id,freight_price
+   from cskaoyan_mall_order where id=#{id}
+    </select>
+
+    <!--5、通过groupon的order_id查询出orderGoods的List信息-->
+    <resultMap id="wxOrderGoodsMaps" type="com.cskaoyan.vo.wx.groupon.WxOrderGoodsVo">
+        <result property="number" column="number"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="orderId" column="order_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsSpecificationValues" column="specifications"/>
+        <result property="id" column="id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="retailPrice" column="price"/>
+    </resultMap>
+    <select id="queryWxOrderGoods" resultMap="wxOrderGoodsMaps">
+      select `number`,pic_url,order_id,goods_id,specifications,id,goods_name,price
+      from cskaoyan_mall_order_goods where order_id=#{id}
+    </select>
+
+    <!--6、根据第一步cskaoyan_mall_groupon查询出来的rules_id查询出rules的信息-->
+    <select id="queryWRulesDetail" resultMap="WxMyRulesMaps">
+        select id,goods_id,goods_name,pic_url,discount,discount_member,add_time,update_time,expire_time,deleted
+        from cskaoyan_mall_groupon_rules where id=#{id}
+    </select>
+
+   <!--7、地址的处理根据第一次查询的user_id查询-->
+    <select id="queryWxAddressDetail" resultType="com.cskaoyan.vo.wx.groupon.WxAddressVo">
+        select user_id,province_id,city_id,area_id,address
+         from cskaoyan_mall_address where user_id=#{id} limit 1
+    </select>
+    <!--8、省-->
+    <select id="queryWxUserProviceById" resultType="string">
+     select `name` from cskaoyan_mall_region  where id =#{id}
+    </select>
+
+    <!--9、市-->
+    <select id="queryWxUserCityById" resultType="string">
+     select `name` from cskaoyan_mall_region  where id =#{id}
+    </select>
+
+    <!--9、区-->
+    <select id="queryWxUserAreaById" resultType="string">
+     select `name` from cskaoyan_mall_region  where id =#{id}
+    </select>
+
+
+</mapper>

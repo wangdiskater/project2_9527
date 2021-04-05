@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cskaoyan.mapper.ConfigMapper">
+
+    <select id="queryMallName" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_mall_name'
+    </select>
+
+    <select id="queryMallAddress" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_mall_address'
+    </select>
+
+    <select id="queryMallPhone" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_mall_phone'
+    </select>
+    
+    <select id="queryMallqq" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_mall_qq'
+    </select>
+
+    <select id="queryFreightMin" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_express_freight_min'
+    </select>
+    
+    <select id="queryFreightValue" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_express_freight_value'
+    </select>
+
+    <select id="queryOrderUnpaid" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_order_unpaid'
+    </select>
+
+    <select id="queryOrderUnconfirm" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_order_unconfirm'
+    </select>
+    
+    <select id="queryOrderComment" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_order_comment'
+    </select>
+
+    <select id="queryWxIndexNew" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_index_new'
+    </select>
+
+    <select id="queryWxShare" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_share'
+    </select>
+
+    <select id="queryWxIndexHot" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_index_hot'
+    </select>
+
+    <select id="queryWxCatlogGoods" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_catlog_goods'
+    </select>
+
+    <select id="queryWxCatlogList" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_catlog_list'
+    </select>
+    
+    <select id="queryWxIndexBrand" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_index_brand'
+    </select>
+
+    <select id="queryWxIndexTopic" resultType="string">
+        select key_value from cskaoyan_mall_system where key_name = 'cskaoyan_mall_wx_index_topic'
+    </select>
+
+    <!--***************************************分割线*************************************-->
+
+    <!--更新商城属性模块-->
+    <update id="updateMallPhone">
+          update cskaoyan_mall_system set key_value = #{cskaoyan_mall_mall_phone} where key_name = 'cskaoyan_mall_mall_phone'
+    </update>
+
+    <update id="updateMallAddress">
+          update cskaoyan_mall_system set key_value = #{cskaoyan_mall_mall_address} where key_name = 'cskaoyan_mall_mall_address'
+    </update>
+
+    <update id="updateMallName">
+          update cskaoyan_mall_system set key_value = #{cskaoyan_mall_mall_name} where key_name = 'cskaoyan_mall_mall_name'
+    </update>
+
+    <update id="updateMallqq">
+          update cskaoyan_mall_system set key_value = #{cskaoyan_mall_mall_qq} where key_name = 'cskaoyan_mall_mall_qq'
+    </update>
+
+
+    <!--更新运费属性模块-->
+    <update id="updateExpressFreightMin">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_express_freight_min} where key_name = 'cskaoyan_mall_express_freight_min'
+    </update>
+    
+    <update id="updateExpressFreightValue">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_express_freight_value} where key_name = 'cskaoyan_mall_express_freight_value'
+    </update>
+
+
+    <!--更新订单属性模块-->
+    <update id="updateOrderUnpaid">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_order_unpaid} where key_name = 'cskaoyan_mall_order_unpaid'
+    </update>
+
+    <update id="updateOrderUnconfirm">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_order_unconfirm} where key_name = 'cskaoyan_mall_order_unconfirm'
+    </update>
+
+    <update id="updateOrderComment">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_order_comment} where key_name = 'cskaoyan_mall_order_comment'
+    </update>
+
+
+    <!--更新微信小程序属性模块-->
+    <select id="updateWxIndexNew">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_index_new} where key_name = 'cskaoyan_mall_wx_index_new'
+    </select>
+
+    <select id="updateWxShare">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_share} where key_name = 'cskaoyan_mall_wx_share'
+    </select>
+
+    <select id="updateWxIndexHot">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_index_hot} where key_name = 'cskaoyan_mall_wx_index_hot'
+    </select>
+
+    <select id="updateWxCatlogGoods">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_catlog_goods} where key_name = 'cskaoyan_mall_wx_catlog_goods'
+    </select>
+    
+    <select id="updateWxCatlogList">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_catlog_list} where key_name = 'cskaoyan_mall_wx_catlog_list'
+    </select>
+    
+    <select id="updateWxIndexBrand">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_index_brand} where key_name = 'cskaoyan_mall_wx_index_brand'
+    </select>
+    
+    <select id="updateWxIndexTopic">
+        update cskaoyan_mall_system set key_value = #{cskaoyan_mall_wx_index_topic} where key_name = 'cskaoyan_mall_wx_index_topic'
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace要等于接口的全类名-->
+<mapper namespace="com.cskaoyan.mapper.StatOrderMapper">
+
+    <!--查询订单中的所有下单日期-->
+    <select id="queryOrderDate" resultType="java.util.Date">
+        select DISTINCT DATE_FORMAT(pay_time,'%Y-%m-%d') `time` FROM cskaoyan_mall_order m GROUP BY `time` ASC
+    </select>
+    <!--将其转换为'年月日'-->
+    <select id="queryChangeDate" resultType="java.util.Date">
+      select DATE_FORMAT(#{date},'%Y-%m-%d');
+    </select>
+    <!--将传入的年月日时间加上一天-->
+    <select id="addOneOnChangeDate" resultType="java.util.Date">
+        select date_add(#{date},INTERVAL '1' day) AS addoneday;
+    </select>
+    <!--根据传入的time1日期来查询这一天的下单信息-->
+    <select id="queryOrder" resultType="com.cskaoyan.bean.OrderInfoForData">
+        SELECT id,user_id,mobile,address,actual_price FROM cskaoyan_mall_order
+        where pay_time  >= #{time1}  AND pay_time  <![CDATA[ < ]]> #{time2}  ORDER BY ID DESC
+    </select>
+
+
+</mapper>
